@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -52,6 +53,38 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Nepal-themed colors
+				saffron: {
+					DEFAULT: '#FF9933',
+					50: '#FFF5EB',
+					100: '#FFEBD7',
+					200: '#FFD6AF',
+					300: '#FFC288',
+					400: '#FFAD60',
+					500: '#FF9933',
+					600: '#FA7B00',
+					700: '#C25F00',
+					800: '#8A4300',
+					900: '#522800',
+				},
+				crimson: {
+					DEFAULT: '#DC143C',
+					50: '#FCE4E9',
+					100: '#F9C9D3',
+					200: '#F394A8',
+					300: '#ED5F7D',
+					400: '#E72A51',
+					500: '#DC143C',
+					600: '#B01030',
+					700: '#840C24',
+					800: '#580818',
+					900: '#2C040C',
+				},
+				himalayan: {
+					white: '#F7F7F7',
+					blue: '#4F86C6',
+					gray: '#A0AEC0',
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -68,27 +101,48 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			fontFamily: {
+				sans: ['Poppins', 'sans-serif'],
+				nepali: ['Mukta', 'sans-serif'],
+			},
 			keyframes: {
 				'accordion-down': {
-					from: {
-						height: '0'
-					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
-					}
+					from: { height: '0' },
+					to: { height: 'var(--radix-accordion-content-height)' }
 				},
 				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
-					},
-					to: {
-						height: '0'
-					}
-				}
+					from: { height: 'var(--radix-accordion-content-height)' },
+					to: { height: '0' }
+				},
+				'spin-slow': {
+					from: { transform: 'rotate(0deg)' },
+					to: { transform: 'rotate(360deg)' },
+				},
+				'fade-in': {
+					'0%': { opacity: '0' },
+					'100%': { opacity: '1' },
+				},
+				'fade-out': {
+					'0%': { opacity: '1' },
+					'100%': { opacity: '0' },
+				},
+				'slide-up': {
+					'0%': { transform: 'translateY(100%)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' },
+				},
+				'slide-down': {
+					'0%': { transform: 'translateY(-100%)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' },
+				},
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'spin-slow': 'spin-slow 8s linear infinite',
+				'fade-in': 'fade-in 0.5s ease-in-out',
+				'fade-out': 'fade-out 0.5s ease-in-out',
+				'slide-up': 'slide-up 0.5s ease-in-out',
+				'slide-down': 'slide-down 0.5s ease-in-out',
 			}
 		}
 	},
