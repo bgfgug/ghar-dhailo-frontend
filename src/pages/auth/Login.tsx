@@ -1,3 +1,4 @@
+
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
@@ -5,31 +6,32 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [showWelcome, setShowWelcome] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Mock successful login
     toast({
       title: "Success",
       description: "You have successfully logged in",
     })
+    setShowWelcome(true)
+  }
+
+  const handleContinue = () => {
+    setShowWelcome(false)
     navigate('/home')
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4" 
-         style={{
-           backgroundImage: 'url("https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=2000&q=80")',
-           backgroundSize: 'cover',
-           backgroundPosition: 'center',
-         }}>
-      <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>Login to your account</CardDescription>
@@ -75,8 +77,22 @@ const Login = () => {
           </CardFooter>
         </form>
       </Card>
-    </div>
-  )
-}
 
-export default Login
+      <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Welcome to Ghar Dhailo! 🎉</DialogTitle>
+            <DialogDescription>
+              We're excited to have you back. Get ready to explore delicious food and fresh groceries!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end">
+            <Button onClick={handleContinue}>Continue to Home</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Login;
