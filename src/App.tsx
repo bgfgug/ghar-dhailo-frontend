@@ -1,23 +1,29 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CartProvider } from "@/context/CartContext";
-import { LocationProvider } from "@/context/LocationContext";
+import { Toaster } from "@/components/ui/toaster"
+import { Toaster as Sonner } from "@/components/ui/sonner"
+import { TooltipProvider } from "@/components/ui/tooltip"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { CartProvider } from "@/context/CartContext"
+import { LocationProvider } from "@/context/LocationContext"
 
 // Import Pages
-import Home from "./pages/Home";
-import Listings from "./pages/Listings";
-import GroceryHub from "./pages/GroceryHub";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
-import About from "./pages/About";
-import FAQ from "./pages/FAQ";
-import NotFound from "./pages/NotFound";
+import Splash from "./pages/Splash"
+import Onboarding from "./pages/Onboarding"
+import Login from "./pages/auth/Login"
+import Signup from "./pages/auth/Signup"
+import ForgotPassword from "./pages/auth/ForgotPassword"
+import ResetPassword from "./pages/auth/ResetPassword"
+import Home from "./pages/Home"
+import Listings from "./pages/Listings"
+import GroceryHub from "./pages/GroceryHub"
+import ProductDetail from "./pages/ProductDetail"
+import Cart from "./pages/Cart"
+import About from "./pages/About"
+import FAQ from "./pages/FAQ"
+import NotFound from "./pages/NotFound"
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient()
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -28,14 +34,19 @@ const App = () => (
         <CartProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Splash />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/auth/login" element={<Login />} />
+              <Route path="/auth/signup" element={<Signup />} />
+              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/reset-password" element={<ResetPassword />} />
+              <Route path="/home" element={<Home />} />
               <Route path="/listings" element={<Listings />} />
               <Route path="/grocery" element={<GroceryHub />} />
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<FAQ />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
@@ -43,6 +54,6 @@ const App = () => (
       </LocationProvider>
     </TooltipProvider>
   </QueryClientProvider>
-);
+)
 
-export default App;
+export default App
