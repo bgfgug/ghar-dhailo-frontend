@@ -26,7 +26,7 @@ const Home = () => {
             backgroundImage: 'url("https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=2000&q=80")',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            backgroundBlend: 'overlay'
+            backgroundBlendMode: 'overlay'
           }}
         >
           <div className="container mx-auto px-4">
