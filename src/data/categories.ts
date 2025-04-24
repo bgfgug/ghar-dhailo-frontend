@@ -1,5 +1,5 @@
 
-import { CircleDashed, BadgeCheck, ShoppingBasket, Utensils, Vegetables } from "lucide-react";
+import { CircleDashed, BadgeCheck, ShoppingBasket, Utensils, Carrot } from "lucide-react";
 
 interface Category {
   id: string;
@@ -35,7 +35,7 @@ export const categories: Category[] = [
     id: "fresh",
     name: "Fresh Produce",
     name_np: "ताजा उत्पादन",
-    icon: Vegetables,
+    icon: Carrot,
     image: "/placeholder.svg",
   },
   {
@@ -48,3 +48,4 @@ export const categories: Category[] = [
 ];
 
 export default categories;
+
