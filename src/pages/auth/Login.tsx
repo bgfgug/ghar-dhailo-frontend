@@ -1,23 +1,35 @@
-
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/components/ui/use-toast"
 
 const Login = () => {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const navigate = useNavigate()
+  const { toast } = useToast()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle login logic here
+    // Mock successful login
+    toast({
+      title: "Success",
+      description: "You have successfully logged in",
+    })
+    navigate('/home')
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4" 
+         style={{
+           backgroundImage: 'url("https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&w=2000&q=80")',
+           backgroundSize: 'cover',
+           backgroundPosition: 'center',
+         }}>
+      <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm">
         <CardHeader>
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>Login to your account</CardDescription>

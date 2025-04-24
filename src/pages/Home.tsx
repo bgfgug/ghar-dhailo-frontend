@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -21,7 +20,15 @@ const Home = () => {
       
       <main className="flex-grow">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-saffron-500 to-crimson-500 text-white py-16">
+        <section 
+          className="bg-gradient-to-br from-saffron-500 to-crimson-500 text-white py-16"
+          style={{
+            backgroundImage: 'url("https://images.unsplash.com/photo-1472396961693-142e6e269027?auto=format&fit=crop&w=2000&q=80")',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundBlend: 'overlay'
+          }}
+        >
           <div className="container mx-auto px-4">
             <div className="max-w-xl">
               <h1 className="text-4xl font-bold mb-4">
