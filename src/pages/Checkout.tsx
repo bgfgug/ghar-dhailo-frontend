@@ -1,11 +1,12 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
 import { Button } from '@/components/ui/button';
+import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
 import { toast } from "@/hooks/use-toast";
 import formatPrice from '@/utils/formatPrice';
 
@@ -43,7 +44,6 @@ const Checkout = () => {
       [name]: value
     }));
     
-    // Clear error for this field when user types
     if (errors[name as keyof FormErrors]) {
       setErrors(prev => ({
         ...prev,
@@ -92,12 +92,9 @@ const Checkout = () => {
 
     setIsSubmitting(true);
 
-    // Generate a random order ID (in a real app, this would come from the server)
-    const orderId = Math.random().toString(36).substring(2, 10).toUpperCase();
-
-    // Simulate API call with a timeout
     setTimeout(() => {
-      // Process the order (in a real app, send data to a server)
+      const orderId = Math.random().toString(36).substring(2, 10).toUpperCase();
+      
       clearCart();
       
       toast({
@@ -105,7 +102,6 @@ const Checkout = () => {
         description: `Your order #${orderId} has been confirmed.`,
       });
       
-      // Navigate to order success page with order details
       navigate('/order/success', { 
         state: {
           orderId,
@@ -123,17 +119,23 @@ const Checkout = () => {
       <Header />
       <main className="flex-grow bg-gray-50 py-8">
         <div className="container mx-auto px-4">
-          <button 
+          <motion.button 
             onClick={() => navigate('/cart')}
             className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
+            whileHover={{ x: -5 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ArrowLeft className="mr-2" size={20} />
             Back to Cart
-          </button>
+          </motion.button>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Delivery Details */}
-            <div className="space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="space-y-6"
+            >
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Delivery Details</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
@@ -193,10 +195,22 @@ const Checkout = () => {
                   </div>
                 </form>
               </div>
-            </div>
+              
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white p-6 rounded-lg shadow-sm"
+              >
+                <PaymentMethodSelector />
+              </motion.div>
+            </motion.div>
 
-            {/* Order Summary */}
-            <div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+            >
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
                 <div className="divide-y divide-gray-200">
@@ -211,7 +225,12 @@ const Checkout = () => {
                   ))}
                 </div>
                 
-                <div className="mt-6 space-y-2">
+                <motion.div 
+                  className="mt-6 space-y-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                >
                   <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
                     <span>{formatPrice(subtotal)}</span>
@@ -224,7 +243,7 @@ const Checkout = () => {
                     <span>Total</span>
                     <span>{formatPrice(total)}</span>
                   </div>
-                </div>
+                </motion.div>
 
                 <Button 
                   className="w-full mt-6"
@@ -240,7 +259,7 @@ const Checkout = () => {
                   By placing your order, you agree to our terms and conditions.
                 </p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>
