@@ -61,7 +61,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         );
       } else {
         // Add new item
-        return [...prev, {
+        const newItem = {
           id: item.id,
           name: item.name,
           price: item.price,
@@ -69,7 +69,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           image: item.image,
           restaurantId: itemType === 'food' ? restaurantId : undefined,
           itemType,
-        }];
+        };
+        // Show toast notification when adding item
+        return [...prev, newItem];
       }
     });
   };
