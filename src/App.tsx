@@ -22,6 +22,7 @@ import About from "./pages/About"
 import FAQ from "./pages/FAQ"
 import NotFound from "./pages/NotFound"
 import OrderTracking from "./pages/OrderTracking"
+import Checkout from "./pages/Checkout"
 
 const queryClient = new QueryClient()
 
@@ -46,6 +47,7 @@ const App = () => (
               <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/order/tracking/:orderId" element={<OrderTracking />} />
+              <Route path="/checkout" element={<Checkout />} />
               <Route path="/about" element={<About />} />
               <Route path="/faq" element={<FAQ />} />
               <Route path="*" element={<NotFound />} />
