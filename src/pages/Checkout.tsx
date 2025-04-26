@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShoppingBag, ArrowLeft } from 'lucide-react';
@@ -36,6 +37,7 @@ const Checkout = () => {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('cod');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -78,6 +80,10 @@ const Checkout = () => {
     return isValid;
   };
 
+  const handlePaymentMethodChange = (methodId: string) => {
+    setPaymentMethod(methodId);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -90,8 +96,24 @@ const Checkout = () => {
       return;
     }
 
+    // For eSewa payment, additional validation would happen here
+    if (paymentMethod === 'esewa') {
+      // In a real implementation, we would check if eSewa is properly configured
+      // For now, we'll just simulate a check
+      const esewaConfigured = document.querySelector('[data-esewa-configured="true"]');
+      if (!esewaConfigured) {
+        toast({
+          title: "eSewa Setup Required",
+          description: "Please set up your eSewa payment details first.",
+          variant: "destructive"
+        });
+        return;
+      }
+    }
+
     setIsSubmitting(true);
 
+    // Simulate API call delay
     setTimeout(() => {
       const orderId = Math.random().toString(36).substring(2, 10).toUpperCase();
       
@@ -106,6 +128,7 @@ const Checkout = () => {
         state: {
           orderId,
           total,
+          paymentMethod,
           items: items.reduce((acc, item) => acc + item.quantity, 0)
         }
       });
@@ -202,7 +225,13 @@ const Checkout = () => {
                 transition={{ delay: 0.2 }}
                 className="bg-white p-6 rounded-lg shadow-sm"
               >
-                <PaymentMethodSelector />
+                <PaymentMethodSelector 
+                  onMethodChange={handlePaymentMethodChange}
+                  defaultMethod={paymentMethod} 
+                />
+                
+                {/* This hidden element will be used to track if eSewa is configured */}
+                <div id="esewa-config-status" data-esewa-configured={paymentMethod === 'esewa' ? 'true' : 'false'} className="hidden"></div>
               </motion.div>
             </motion.div>
 

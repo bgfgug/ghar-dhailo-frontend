@@ -11,6 +11,7 @@ interface OrderSuccessState {
   orderId: string;
   total: number;
   items: number;
+  paymentMethod?: string;
 }
 
 const OrderSuccess = () => {
@@ -28,6 +29,16 @@ const OrderSuccess = () => {
   if (!orderDetails || !orderDetails.orderId) {
     return null;
   }
+
+  const getPaymentMethodDisplay = (method: string = 'cod') => {
+    switch(method) {
+      case 'esewa':
+        return 'eSewa Wallet';
+      case 'cod':
+      default:
+        return 'Cash on Delivery';
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -61,7 +72,7 @@ const OrderSuccess = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Payment Method</span>
-                  <span>Cash on Delivery</span>
+                  <span>{getPaymentMethodDisplay(orderDetails.paymentMethod)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Estimated Delivery</span>

@@ -1,8 +1,9 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CreditCard, Wallet } from 'lucide-react'
+import { CreditCard, Wallet, CheckCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { toast } from "@/hooks/use-toast"
 
 interface PaymentMethod {
   id: string
@@ -26,8 +27,16 @@ const paymentMethods: PaymentMethod[] = [
   }
 ]
 
-export function PaymentMethodSelector() {
-  const [selectedMethod, setSelectedMethod] = useState('cod')
+interface PaymentMethodSelectorProps {
+  onMethodChange?: (methodId: string) => void;
+  defaultMethod?: string;
+}
+
+export function PaymentMethodSelector({ onMethodChange, defaultMethod = 'cod' }: PaymentMethodSelectorProps) {
+  const [selectedMethod, setSelectedMethod] = useState(defaultMethod)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [esewaPhoneNumber, setEsewaPhoneNumber] = useState('')
+  const [showEsewaFields, setShowEsewaFields] = useState(false)
 
   const getIcon = (iconName: 'credit-card' | 'wallet') => {
     switch (iconName) {
@@ -36,6 +45,49 @@ export function PaymentMethodSelector() {
       case 'wallet':
         return <Wallet className="h-5 w-5 text-primary" />
     }
+  }
+
+  const handleMethodSelect = (methodId: string) => {
+    setSelectedMethod(methodId)
+    if (methodId === 'esewa') {
+      setShowEsewaFields(true)
+    } else {
+      setShowEsewaFields(false)
+    }
+    if (onMethodChange) {
+      onMethodChange(methodId)
+    }
+  }
+
+  const handleEsewaMockPay = () => {
+    if (!esewaPhoneNumber) {
+      toast({
+        title: "eSewa Phone Required",
+        description: "Please enter your eSewa registered phone number.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!/^(98|97)\d{8}$/.test(esewaPhoneNumber)) {
+      toast({
+        title: "Invalid Phone Format",
+        description: "Please enter a valid Nepali phone number (e.g., 98XXXXXXXX).",
+        variant: "destructive"
+      })
+      return
+    }
+
+    setIsProcessing(true)
+    
+    // Mock API call to eSewa
+    setTimeout(() => {
+      setIsProcessing(false)
+      toast({
+        title: "eSewa Payment Ready",
+        description: "Your payment method has been configured. You can place your order now.",
+      })
+    }, 1500)
   }
 
   return (
@@ -53,7 +105,7 @@ export function PaymentMethodSelector() {
             className={`relative rounded-lg border-2 p-4 cursor-pointer
               ${selectedMethod === method.id ? 'border-primary bg-primary/5' : 'border-gray-200'}
             `}
-            onClick={() => setSelectedMethod(method.id)}
+            onClick={() => handleMethodSelect(method.id)}
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
@@ -92,6 +144,54 @@ export function PaymentMethodSelector() {
             </div>
           </motion.div>
         ))}
+
+        {/* eSewa Details Section */}
+        {selectedMethod === 'esewa' && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="bg-gray-50 rounded-lg p-4 overflow-hidden"
+          >
+            <h4 className="font-medium mb-3">eSewa Payment Details</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  eSewa Mobile Number
+                </label>
+                <input
+                  type="tel"
+                  value={esewaPhoneNumber}
+                  onChange={(e) => setEsewaPhoneNumber(e.target.value)}
+                  placeholder="98XXXXXXXX"
+                  className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <p className="text-xs text-gray-500 mt-1">Enter your eSewa registered mobile number</p>
+              </div>
+
+              <Button 
+                onClick={handleEsewaMockPay}
+                disabled={isProcessing}
+                className="w-full bg-[#60BB46] hover:bg-[#4a9e34] text-white"
+              >
+                {isProcessing ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </span>
+                ) : "Link eSewa Account"}
+              </Button>
+              
+              <p className="text-xs text-center text-gray-500">
+                Your actual eSewa account will not be charged until the backend integration is complete. 
+                This is only a UI demonstration.
+              </p>
+            </div>
+          </motion.div>
+        )}
       </div>
     </div>
   )
