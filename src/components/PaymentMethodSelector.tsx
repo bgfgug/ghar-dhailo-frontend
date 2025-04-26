@@ -1,26 +1,42 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CreditCard } from 'lucide-react'
+import { CreditCard, Wallet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 interface PaymentMethod {
   id: string
   name: string
   description: string
+  icon: 'credit-card' | 'wallet'
 }
 
 const paymentMethods: PaymentMethod[] = [
   {
     id: 'cod',
     name: 'Cash on Delivery',
-    description: 'Pay when you receive your order'
+    description: 'Pay when you receive your order',
+    icon: 'credit-card'
+  },
+  {
+    id: 'esewa',
+    name: 'eSewa',
+    description: 'Pay securely with your eSewa wallet',
+    icon: 'wallet'
   }
-  // Future payment methods can be added here
 ]
 
 export function PaymentMethodSelector() {
   const [selectedMethod, setSelectedMethod] = useState('cod')
+
+  const getIcon = (iconName: 'credit-card' | 'wallet') => {
+    switch (iconName) {
+      case 'credit-card':
+        return <CreditCard className="h-5 w-5 text-primary" />
+      case 'wallet':
+        return <Wallet className="h-5 w-5 text-primary" />
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -41,11 +57,22 @@ export function PaymentMethodSelector() {
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <CreditCard className="h-5 w-5 text-primary" />
+                {getIcon(method.icon)}
               </div>
               <div>
                 <h4 className="font-medium">{method.name}</h4>
                 <p className="text-sm text-gray-500">{method.description}</p>
+                {method.id === 'esewa' && (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="mt-2 flex items-center gap-2"
+                  >
+                    <div className="h-4 w-8 bg-[#60BB46] rounded"></div>
+                    <span className="text-xs text-gray-500">Secured by eSewa</span>
+                  </motion.div>
+                )}
               </div>
               <motion.div
                 className="ml-auto h-5 w-5 rounded-full border-2 border-gray-300"
