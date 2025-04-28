@@ -26,7 +26,16 @@ import OrderTracking from "./pages/OrderTracking"
 import Checkout from "./pages/Checkout"
 import OrderSuccess from "./pages/OrderSuccess"
 
-const queryClient = new QueryClient()
+// Create a client
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: false
+    },
+  },
+})
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
