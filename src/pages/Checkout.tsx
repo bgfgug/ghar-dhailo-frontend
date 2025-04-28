@@ -1,15 +1,17 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingBag, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useCart } from '@/context/CartContext';
-import { Button } from '@/components/ui/button';
 import { PaymentMethodSelector } from '@/components/PaymentMethodSelector';
 import { toast } from "@/hooks/use-toast";
-import formatPrice from '@/utils/formatPrice';
+import { validateField, required, isNepaliPhone } from '@/utils/validate';
+import ConfirmationDialog from '@/components/ConfirmationDialog';
+import DeliveryForm from '@/components/checkout/DeliveryForm';
+import OrderSummary from '@/components/checkout/OrderSummary';
 
 interface FormData {
   fullName: string;
@@ -28,7 +30,6 @@ const Checkout = () => {
   const navigate = useNavigate();
   const subtotal = getTotal();
   const deliveryFee = 100;
-  const total = subtotal + deliveryFee;
 
   const [formData, setFormData] = useState<FormData>({
     fullName: '',
@@ -38,6 +39,7 @@ const Checkout = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cod');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -58,21 +60,31 @@ const Checkout = () => {
     const newErrors: FormErrors = {};
     let isValid = true;
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
+    // Full name validation
+    const fullNameError = validateField(formData.fullName, [
+      required('Full name')
+    ]);
+    if (fullNameError) {
+      newErrors.fullName = fullNameError;
       isValid = false;
     }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-      isValid = false;
-    } else if (!/^(98|97)\d{8}$/.test(formData.phone)) {
-      newErrors.phone = 'Enter a valid Nepali phone number (e.g., 98XXXXXXXX)';
+    // Phone validation
+    const phoneError = validateField(formData.phone, [
+      required('Phone number'),
+      isNepaliPhone()
+    ]);
+    if (phoneError) {
+      newErrors.phone = phoneError;
       isValid = false;
     }
 
-    if (!formData.address.trim()) {
-      newErrors.address = 'Delivery address is required';
+    // Address validation
+    const addressError = validateField(formData.address, [
+      required('Delivery address')
+    ]);
+    if (addressError) {
+      newErrors.address = addressError;
       isValid = false;
     }
 
@@ -84,7 +96,7 @@ const Checkout = () => {
     setPaymentMethod(methodId);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handlePreSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) {
@@ -96,10 +108,8 @@ const Checkout = () => {
       return;
     }
 
-    // For eSewa payment, additional validation would happen here
+    // For eSewa payment, additional validation
     if (paymentMethod === 'esewa') {
-      // In a real implementation, we would check if eSewa is properly configured
-      // For now, we'll just simulate a check
       const esewaConfigured = document.querySelector('[data-esewa-configured="true"]');
       if (!esewaConfigured) {
         toast({
@@ -111,6 +121,12 @@ const Checkout = () => {
       }
     }
 
+    // Show confirmation dialog
+    setShowConfirmDialog(true);
+  };
+
+  const handleSubmit = () => {
+    setShowConfirmDialog(false);
     setIsSubmitting(true);
 
     // Simulate API call delay
@@ -127,7 +143,7 @@ const Checkout = () => {
       navigate('/order/success', { 
         state: {
           orderId,
-          total,
+          total: subtotal + deliveryFee,
           paymentMethod,
           items: items.reduce((acc, item) => acc + item.quantity, 0)
         }
@@ -136,6 +152,28 @@ const Checkout = () => {
       setIsSubmitting(false);
     }, 1500);
   };
+
+  // Render empty cart state
+  if (items.length === 0) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <main className="flex-grow bg-gray-50 py-8">
+          <div className="container mx-auto px-4 text-center py-16">
+            <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+            <p className="text-gray-600 mb-8">You need to add items to your cart before checkout</p>
+            <button 
+              className="bg-primary text-white px-6 py-3 rounded-md font-medium"
+              onClick={() => navigate('/listings')}
+            >
+              Browse Restaurants
+            </button>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -147,6 +185,7 @@ const Checkout = () => {
             className="flex items-center text-gray-600 hover:text-gray-900 mb-6"
             whileHover={{ x: -5 }}
             whileTap={{ scale: 0.95 }}
+            aria-label="Back to cart"
           >
             <ArrowLeft className="mr-2" size={20} />
             Back to Cart
@@ -159,65 +198,11 @@ const Checkout = () => {
               transition={{ duration: 0.5 }}
               className="space-y-6"
             >
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Delivery Details</h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md ${
-                        errors.fullName ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your full name"
-                    />
-                    {errors.fullName && (
-                      <p className="mt-1 text-sm text-red-500">{errors.fullName}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md ${
-                        errors.phone ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      placeholder="Enter your phone number"
-                    />
-                    {errors.phone && (
-                      <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Delivery Address
-                    </label>
-                    <textarea
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className={`w-full px-3 py-2 border rounded-md ${
-                        errors.address ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      rows={3}
-                      placeholder="Enter your delivery address"
-                    />
-                    {errors.address && (
-                      <p className="mt-1 text-sm text-red-500">{errors.address}</p>
-                    )}
-                  </div>
-                </form>
-              </div>
+              <DeliveryForm 
+                formData={formData}
+                errors={errors}
+                handleChange={handleChange}
+              />
               
               <motion.div 
                 initial={{ opacity: 0 }}
@@ -240,59 +225,27 @@ const Checkout = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
             >
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-                <div className="divide-y divide-gray-200">
-                  {items.map((item) => (
-                    <div key={item.id} className="py-3 flex justify-between">
-                      <div>
-                        <p className="font-medium">{item.name}</p>
-                        <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
-                      </div>
-                      <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
-                    </div>
-                  ))}
-                </div>
-                
-                <motion.div 
-                  className="mt-6 space-y-2"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                >
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
-                  </div>
-                  <div className="flex justify-between text-gray-600">
-                    <span>Delivery Fee</span>
-                    <span>{formatPrice(deliveryFee)}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-semibold pt-2 border-t">
-                    <span>Total</span>
-                    <span>{formatPrice(total)}</span>
-                  </div>
-                </motion.div>
-
-                <Button 
-                  className="w-full mt-6"
-                  size="lg"
-                  disabled={isSubmitting || items.length === 0}
-                  onClick={handleSubmit}
-                >
-                  <ShoppingBag className="mr-2" size={20} />
-                  {isSubmitting ? "Processing..." : `Place Order (${formatPrice(total)})`}
-                </Button>
-                
-                <p className="text-center text-gray-500 text-sm mt-4">
-                  By placing your order, you agree to our terms and conditions.
-                </p>
-              </div>
+              <OrderSummary 
+                items={items}
+                subtotal={subtotal}
+                deliveryFee={deliveryFee}
+                isSubmitting={isSubmitting}
+                onSubmit={handlePreSubmit}
+              />
             </motion.div>
           </div>
         </div>
       </main>
       <Footer />
+
+      <ConfirmationDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        title="Confirm Your Order"
+        description="Are you sure you want to place this order? You'll be charged once the order is confirmed."
+        confirmText="Place Order"
+        onConfirm={handleSubmit}
+      />
     </div>
   );
 };
