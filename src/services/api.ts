@@ -1,4 +1,3 @@
-
 import { mockApiCall } from '@/utils/mockDelay';
 import { restaurants } from '@/data/restaurants';
 import { groceries } from '@/data/groceries';
@@ -55,7 +54,7 @@ export const groceryApi = {
   },
   
   getByCategory: async (categoryId: string) => {
-    const results = groceries.filter(g => g.categoryId === categoryId);
+    const results = groceries.filter(g => g.category === categoryId);
     return mockApiCall(results, API_DELAY);
   }
 };
