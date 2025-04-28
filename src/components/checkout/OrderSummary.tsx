@@ -2,12 +2,12 @@
 import React from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { CartItem } from '@/context/CartContext';
+import { CartItemType } from '@/context/CartContext';
 import formatPrice from '@/utils/formatPrice';
 import ButtonLoading from '@/components/ui/skeletons/ButtonLoading';
 
 interface OrderSummaryProps {
-  items: CartItem[];
+  items: CartItemType[];
   subtotal: number;
   deliveryFee: number;
   isSubmitting: boolean;

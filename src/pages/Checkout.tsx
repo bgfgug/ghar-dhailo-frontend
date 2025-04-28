@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -125,6 +124,10 @@ const Checkout = () => {
     setShowConfirmDialog(true);
   };
 
+  const handleOrderSubmit = () => {
+    handlePreSubmit(new Event('submit') as unknown as React.FormEvent);
+  };
+
   const handleSubmit = () => {
     setShowConfirmDialog(false);
     setIsSubmitting(true);
@@ -153,7 +156,6 @@ const Checkout = () => {
     }, 1500);
   };
 
-  // Render empty cart state
   if (items.length === 0) {
     return (
       <div className="flex flex-col min-h-screen">
@@ -215,7 +217,6 @@ const Checkout = () => {
                   defaultMethod={paymentMethod} 
                 />
                 
-                {/* This hidden element will be used to track if eSewa is configured */}
                 <div id="esewa-config-status" data-esewa-configured={paymentMethod === 'esewa' ? 'true' : 'false'} className="hidden"></div>
               </motion.div>
             </motion.div>
@@ -230,7 +231,7 @@ const Checkout = () => {
                 subtotal={subtotal}
                 deliveryFee={deliveryFee}
                 isSubmitting={isSubmitting}
-                onSubmit={handlePreSubmit}
+                onSubmit={handleOrderSubmit}
               />
             </motion.div>
           </div>
