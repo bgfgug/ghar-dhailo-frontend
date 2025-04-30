@@ -1,4 +1,3 @@
-
 // This is a placeholder for Google Maps API integration
 // Replace the mockup functions with actual Google Maps API calls when you have the API key
 
@@ -81,7 +80,7 @@ export const getRouteInfo = (): RouteInfo => {
 
 // Helper to check if Maps API is loaded
 export const isMapsApiLoaded = (): boolean => {
-  return typeof window !== "undefined" && Boolean(window.google?.maps);
+  return typeof window !== "undefined" && Boolean(window.google && window.google.maps);
 };
 
 // This will be updated with your actual API key

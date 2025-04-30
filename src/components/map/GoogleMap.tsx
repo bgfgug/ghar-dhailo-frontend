@@ -27,10 +27,14 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   const [mapLoaded, setMapLoaded] = useState(isMapsApiLoaded());
   const [map, setMap] = useState<google.maps.Map | null>(null);
   
+  // Check for locally stored API key
+  const storedApiKey = typeof localStorage !== 'undefined' ? localStorage.getItem('google_maps_api_key') : null;
+  const effectiveApiKey = apiKey || storedApiKey || GOOGLE_MAPS_API_KEY;
+  
   // Load Google Maps API
   useEffect(() => {
     // Don't load if API key is not provided
-    if (!GOOGLE_MAPS_API_KEY && !apiKey) {
+    if (!effectiveApiKey || effectiveApiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
       console.error('Google Maps API key is required');
       return;
     }
@@ -40,11 +44,11 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
         setMapLoaded(true);
       });
     }
-  }, [mapLoaded, apiKey]);
+  }, [mapLoaded, effectiveApiKey]);
 
   // Initialize map
   useEffect(() => {
-    if (!mapLoaded || !mapRef.current) return;
+    if (!mapLoaded || !mapRef.current || !window.google?.maps) return;
     
     const mapOptions: google.maps.MapOptions = {
       center,
@@ -73,7 +77,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
   // Add markers
   useEffect(() => {
-    if (!map || !markers.length) return;
+    if (!map || !markers.length || !window.google?.maps) return;
     
     const googleMarkers = markers.map(markerData => {
       return new google.maps.Marker({
@@ -91,7 +95,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
 
   // Draw path
   useEffect(() => {
-    if (!map || !path.length) return;
+    if (!map || !path.length || !window.google?.maps) return;
     
     const routePath = new google.maps.Polyline({
       path,
@@ -118,7 +122,7 @@ const GoogleMap: React.FC<GoogleMapProps> = ({
   }
 
   // If no API key is provided, show a message
-  if (!GOOGLE_MAPS_API_KEY && !apiKey) {
+  if (!effectiveApiKey || effectiveApiKey === 'YOUR_GOOGLE_MAPS_API_KEY') {
     return (
       <div className={`${className} bg-gray-100 flex items-center justify-center`}>
         <div className="text-center p-4">

@@ -4,6 +4,8 @@ import { groceries } from '@/data/groceries';
 import { categories } from '@/data/categories';
 import { promos } from '@/data/promos';
 import { festivals } from '@/data/festivals';
+import { OrderStatus, OrderTrackingInfo } from '@/types/api';
+import { getDriverLocation, getRestaurantLocation, getCustomerLocation, getRouteInfo, getEstimatedDeliveryTime } from '@/services/mapsApi';
 
 // Base API service with common functionality
 const API_DELAY = 800; // Simulate network delay in ms
@@ -137,5 +139,32 @@ export const orderApi = {
   getUserOrders: async (userId: string) => {
     // Mock user orders (will be replaced with real API)
     return mockApiCall([], API_DELAY);
+  },
+
+  // Add the missing getOrderTracking method
+  getOrderTracking: async (orderId: string): Promise<OrderTrackingInfo> => {
+    // This is a mock implementation that will be replaced with actual API call
+    const restaurantLocation = getRestaurantLocation();
+    const customerLocation = getCustomerLocation();
+    const driverLocation = getDriverLocation();
+    const route = getRouteInfo();
+    
+    // Determine a random order status for testing
+    const statuses: OrderStatus[] = ['processing', 'out_for_delivery', 'delivered'];
+    const randomStatus = statuses[Math.floor(Math.random() * 2)] as OrderStatus;
+    
+    return mockApiCall({
+      orderId,
+      status: randomStatus,
+      restaurantLocation,
+      customerLocation,
+      driverLocation,
+      driverName: 'John Driver',
+      driverPhone: '+977-9812345678',
+      estimatedDeliveryMinutes: getEstimatedDeliveryTime(randomStatus),
+      distanceRemaining: route.distance,
+      route: route.path,
+      lastUpdated: new Date().toISOString()
+    }, API_DELAY);
   }
 };
