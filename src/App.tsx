@@ -29,6 +29,7 @@ import NotFound from "./pages/NotFound"
 import OrderTracking from "./pages/OrderTracking"
 import Checkout from "./pages/Checkout"
 import OrderSuccess from "./pages/OrderSuccess"
+import FestivalSpecial from "./pages/FestivalSpecial"
 
 // Admin Pages
 import AdminDashboard from "./pages/admin/AdminDashboard"
@@ -196,6 +197,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['user', 'admin', 'driver']}>
                       <OrderSuccess />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/festivals" 
+                  element={
+                    <ProtectedRoute allowedRoles={['user', 'admin', 'driver']}>
+                      <FestivalSpecial />
                     </ProtectedRoute>
                   } 
                 />
