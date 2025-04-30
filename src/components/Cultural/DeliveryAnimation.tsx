@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Scooter } from 'lucide-react';
+import { Bike } from 'lucide-react'; // Changed from Scooter to Bike which is available in lucide-react
 
 interface DeliveryAnimationProps {
   /** Initial ETA in minutes */
@@ -104,7 +104,7 @@ const DeliveryAnimation: React.FC<DeliveryAnimationProps> = ({
         <div className="absolute top-1/2 transform -translate-y-1/2 w-full h-1 bg-yellow-400 dashed-line"></div>
       </div>
       
-      {/* Animated Scooter */}
+      {/* Animated Scooter (using Bike icon instead) */}
       <motion.div
         className="absolute bottom-12"
         style={{ left: scooterX }}
@@ -113,7 +113,7 @@ const DeliveryAnimation: React.FC<DeliveryAnimationProps> = ({
         transition={{ type: 'spring', stiffness: 100 }}
       >
         <div className="relative">
-          <Scooter 
+          <Bike 
             className={`text-primary ${compact ? 'h-8 w-8' : 'h-10 w-10'}`} 
             style={{ transform: 'scaleX(1)' }}
           />
@@ -162,9 +162,9 @@ const DeliveryAnimation: React.FC<DeliveryAnimationProps> = ({
         </div>
       )}
       
-      {/* Add Nepali styling via CSS */}
-      <style jsx>{`
-        .dashed-line {
+      {/* Fixed the style tag by removing the jsx property */}
+      <style>
+        {`.dashed-line {
           background: repeating-linear-gradient(
             to right,
             #F9D923,
@@ -172,8 +172,8 @@ const DeliveryAnimation: React.FC<DeliveryAnimationProps> = ({
             transparent 10px,
             transparent 20px
           );
-        }
-      `}</style>
+        }`}
+      </style>
     </div>
   );
 };
