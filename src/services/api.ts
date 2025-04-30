@@ -140,31 +140,29 @@ export const orderApi = {
     // Mock user orders (will be replaced with real API)
     return mockApiCall([], API_DELAY);
   },
-
-  // Add the missing getOrderTracking method
-  getOrderTracking: async (orderId: string): Promise<OrderTrackingInfo> => {
-    // This is a mock implementation that will be replaced with actual API call
-    const restaurantLocation = getRestaurantLocation();
-    const customerLocation = getCustomerLocation();
-    const driverLocation = getDriverLocation();
-    const route = getRouteInfo();
+  
+  getOrderTracking: (orderId: string) => {
+    // Import from mapsApi to reuse the mock data
+    const { 
+      getDriverLocation, 
+      getRestaurantLocation, 
+      getCustomerLocation, 
+      getRouteInfo,
+      getEstimatedDeliveryTime
+    } = require('./mapsApi');
     
-    // Determine a random order status for testing
-    const statuses: OrderStatus[] = ['processing', 'out_for_delivery', 'delivered'];
-    const randomStatus = statuses[Math.floor(Math.random() * 2)] as OrderStatus;
-    
-    return mockApiCall({
+    return Promise.resolve({
       orderId,
-      status: randomStatus,
-      restaurantLocation,
-      customerLocation,
-      driverLocation,
-      driverName: 'John Driver',
-      driverPhone: '+977-9812345678',
-      estimatedDeliveryMinutes: getEstimatedDeliveryTime(randomStatus),
-      distanceRemaining: route.distance,
-      route: route.path,
+      status: 'out_for_delivery',
+      restaurantLocation: getRestaurantLocation(),
+      customerLocation: getCustomerLocation(),
+      driverLocation: getDriverLocation(),
+      driverName: "Rajesh Kumar",
+      driverPhone: "+977-9801234567",
+      estimatedDeliveryMinutes: getEstimatedDeliveryTime('out_for_delivery'),
+      distanceRemaining: "2.5 km",
+      route: getRouteInfo().path,
       lastUpdated: new Date().toISOString()
-    }, API_DELAY);
+    });
   }
 };

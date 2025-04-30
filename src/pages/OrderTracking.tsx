@@ -11,6 +11,7 @@ import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import EmptyState from '@/components/EmptyState';
 import GoogleMap from '@/components/map/GoogleMap';
+import DeliveryAnimation from '@/components/Cultural/DeliveryAnimation';
 import { OrderStatus } from '@/types/api';
 import {
   getDriverLocation,
@@ -44,7 +45,7 @@ const OrderTracking = () => {
   const [mapMarkers, setMapMarkers] = useState<any[]>([]);
   const [mapPath, setMapPath] = useState<any[]>([]);
   const [estimatedTime, setEstimatedTime] = useState<number>(0);
-
+  
   // Setup map data
   useEffect(() => {
     if (!isLoading && !error) {
@@ -231,6 +232,7 @@ const OrderTracking = () => {
                         path={mapPath}
                         center={mapMarkers[1]?.position || { lat: 27.7172, lng: 85.3240 }}
                         className="w-full h-full"
+                        staticMode={true} // Use static mode
                       />
                     </div>
                     
@@ -259,6 +261,11 @@ const OrderTracking = () => {
                           </p>
                         </div>
                       </div>
+                    </div>
+                    
+                    {/* Added Nepali-themed delivery animation for additional visual feedback */}
+                    <div className="mt-6">
+                      <DeliveryAnimation initialEta={estimatedTime} autoPlay={true} />
                     </div>
                   </div>
                 </TabsContent>

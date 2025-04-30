@@ -1,3 +1,4 @@
+
 // This is a placeholder for Google Maps API integration
 // Replace the mockup functions with actual Google Maps API calls when you have the API key
 
@@ -78,25 +79,35 @@ export const getRouteInfo = (): RouteInfo => {
   };
 };
 
-// Helper to check if Maps API is loaded
+// Helper to check if Maps API is loaded - simplified for static version
 export const isMapsApiLoaded = (): boolean => {
-  return typeof window !== "undefined" && Boolean(window.google && window.google.maps);
+  // For static mode, we'll always return false so the API doesn't load
+  return false;
 };
 
 // This will be updated with your actual API key
 export const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
 
-// Function to load Google Maps API script
+// Function to load Google Maps API script - modified to work in static mode
 export const loadGoogleMapsApi = (callback: () => void) => {
-  if (isMapsApiLoaded()) {
-    callback();
-    return;
-  }
+  // In static mode, we won't actually load the script
+  // The callback is still called to maintain API compatibility
+  setTimeout(callback, 100);
+};
 
-  const script = document.createElement("script");
-  script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=places`;
-  script.async = true;
-  script.defer = true;
-  script.onload = callback;
-  document.head.appendChild(script);
+// Add missing getOrderTracking function to fix the TS error
+export const getOrderTracking = (orderId: string) => {
+  return Promise.resolve({
+    orderId,
+    status: 'out_for_delivery' as OrderStatus,
+    restaurantLocation: mockLocations.restaurant,
+    customerLocation: mockLocations.customer,
+    driverLocation: mockLocations.driver,
+    driverName: "Rajesh Kumar",
+    driverPhone: "+977-9801234567",
+    estimatedDeliveryMinutes: 20,
+    distanceRemaining: "2.5 km",
+    route: mockRoutePath,
+    lastUpdated: new Date().toISOString()
+  });
 };
