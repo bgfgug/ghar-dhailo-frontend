@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { CheckCircle, ShoppingBag, Home } from 'lucide-react';
+import { CheckCircle, ShoppingBag, Home, MapPin } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -81,7 +81,7 @@ const OrderSuccess = () => {
               </div>
             </div>
             
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 justify-center">
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/">
                   <Home size={18} />
@@ -89,9 +89,15 @@ const OrderSuccess = () => {
                 </Link>
               </Button>
               <Button asChild className="gap-2">
-                <Link to="/order/tracking/latest">
+                <Link to={`/order/tracking/${orderDetails.orderId}`}>
                   <ShoppingBag size={18} />
                   Track Order
+                </Link>
+              </Button>
+              <Button asChild variant="secondary" className="gap-2">
+                <Link to="/listings">
+                  <MapPin size={18} />
+                  Browse More
                 </Link>
               </Button>
             </div>

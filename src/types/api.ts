@@ -99,6 +99,26 @@ export interface Order {
   estimatedDeliveryTime?: string;
 }
 
+// New interfaces for order tracking
+export interface OrderLocation {
+  lat: number;
+  lng: number;
+}
+
+export interface OrderTrackingInfo {
+  orderId: string;
+  status: OrderStatus;
+  restaurantLocation: OrderLocation;
+  customerLocation: OrderLocation;
+  driverLocation?: OrderLocation;
+  driverName?: string;
+  driverPhone?: string;
+  estimatedDeliveryMinutes: number;
+  distanceRemaining: string; // e.g. "2.5 km"
+  route: OrderLocation[];
+  lastUpdated: string;
+}
+
 // Driver related types
 export interface Driver {
   id: string;
