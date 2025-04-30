@@ -1,156 +1,160 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Star, Clock, MapPin, ChevronLeft, ChevronRight, Timer, Info } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { 
-  SpiceLevelIndicator, 
-  DietaryTags, 
-  EmergencyNotice,
-  HimalayaLoader
-} from '@/components/Cultural';
+import MenuItemCard from '@/components/MenuItemCard';
+import { restaurants } from '@/data/restaurants';
+import formatPrice from '@/utils/formatPrice';
 
-// This is a stub implementation - we'll need to integrate with actual components as needed
+type MenuCategory = {
+  id: string;
+  name: string;
+  items: typeof restaurants[0]['menu'];
+};
+
 const ProductDetail = () => {
-  const { id } = useParams();
-  const [loading, setLoading] = useState(true);
-  const [product, setProduct] = useState<any>(null);
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'menu' | 'reviews'>('menu');
   
-  useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setProduct({
-        id,
-        name: 'Vegetable Momo',
-        name_np: 'भेजिटेबल मम',
-        price: 150,
-        description: 'Steamed dumplings filled with mixed vegetables and spices',
-        description_np: 'मिश्रित सागसब्जी र मसलाहरूले भरिएको वाफबाट पकाइएको मम',
-        image: '/placeholder.svg',
-        spiceLevel: 3,
-        dietaryTags: ['vegetarian', 'no_onion_garlic'],
-        ingredients: ['Flour', 'Cabbage', 'Carrot', 'Bell Pepper', 'Spices'],
-        isVeg: true
+  // Find restaurant by id
+  const restaurant = restaurants.find(r => r.id === id);
+  
+  // If restaurant not found, redirect to listings
+  if (!restaurant) {
+    navigate('/listings');
+    return null;
+  }
+  
+  // Group menu items by category
+  const menuCategories: MenuCategory[] = restaurant.menu.reduce((acc: MenuCategory[], item) => {
+    const existingCategory = acc.find(cat => cat.id === item.category);
+    if (existingCategory) {
+      existingCategory.items.push(item);
+    } else {
+      acc.push({
+        id: item.category,
+        name: item.category.charAt(0).toUpperCase() + item.category.slice(1),
+        items: [item]
       });
-      setLoading(false);
-    }, 1500);
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col items-center justify-center py-16">
-            <HimalayaLoader variant="yeti" size="lg" />
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
-  if (!product) {
-    return (
-      <div className="min-h-screen">
-        <Header />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-16">
-            <h2 className="text-2xl font-bold mb-4">Product Not Found</h2>
-            <p className="mb-8">The product you're looking for doesn't exist or has been removed.</p>
-            <Link to="/listings" className="text-primary hover:underline">
-              Browse Other Products
-            </Link>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+    }
+    return acc;
+  }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        <EmergencyNotice 
-          type="general"
-          title="Festival Special Offer"
-          title_np="चाडपर्व विशेष अफर"
-          description="Get 10% off on all momo orders during Dashain festival!"
-          description_np="दशैं चाडको अवसरमा सबै मम अर्डरमा १०% छुट पाउनुहोस्!"
-          severity="low"
-          actionLabel="View Offer"
-        />
+      <main className="flex-grow bg-gray-50">
+        {/* Restaurant banner */}
+        <div className="h-48 sm:h-64 bg-gray-300 relative overflow-hidden">
+          <img 
+            src={restaurant.image} 
+            alt={restaurant.name}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          
+          <div className="absolute bottom-0 left-0 w-full p-4 sm:p-6">
+            <button 
+              onClick={() => navigate(-1)}
+              className="bg-white/20 backdrop-blur-sm p-2 rounded-full mb-2"
+            >
+              <ChevronLeft size={20} className="text-white" />
+            </button>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white mb-2">{restaurant.name}</h1>
+            {restaurant.name_np && (
+              <p className="text-white/90 font-nepali">{restaurant.name_np}</p>
+            )}
+          </div>
+        </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
-          {/* Product Image */}
-          <div className="bg-gray-100 rounded-lg overflow-hidden">
-            <img 
-              src={product.image} 
-              alt={product.name} 
-              className="w-full h-full object-cover"
-            />
+        {/* Restaurant info */}
+        <div className="container mx-auto px-4">
+          <div className="bg-white rounded-lg shadow-sm -mt-6 relative z-10 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col sm:flex-row gap-4 sm:items-center flex-grow">
+              <div className="flex items-center bg-green-50 px-3 py-1 rounded">
+                <Star size={16} className="text-green-600 mr-1" />
+                <span className="font-medium text-green-700">{restaurant.rating}</span>
+              </div>
+              
+              <div className="flex items-center text-gray-600">
+                <Clock size={16} className="mr-1" />
+                <span>{restaurant.deliveryTime} mins</span>
+              </div>
+              
+              <div className="flex items-center text-gray-600">
+                <MapPin size={16} className="mr-1" />
+                <span>{restaurant.address}</span>
+              </div>
+            </div>
+            
+            <div className="text-right">
+              <p className="text-gray-600">Delivery Fee</p>
+              <p className="font-medium">{formatPrice(restaurant.deliveryFee)}</p>
+            </div>
           </div>
           
-          {/* Product Details */}
-          <div>
-            <h1 className="text-2xl font-bold">{product.name}</h1>
-            {product.name_np && (
-              <h2 className="text-lg font-nepali text-gray-600 mb-2">{product.name_np}</h2>
-            )}
-            
-            <div className="flex items-center gap-4 mt-4 mb-6">
-              <p className="text-xl font-semibold">Rs. {product.price}</p>
-              
-              {/* Spice level indicator */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-600">Spice Level:</span>
-                <SpiceLevelIndicator level={product.spiceLevel} size="sm" />
+          {/* Tabs */}
+          <div className="bg-white mt-6 rounded-lg shadow-sm">
+            <div className="border-b border-gray-200">
+              <div className="flex">
+                <button
+                  className={`px-6 py-4 font-medium text-sm relative ${
+                    activeTab === 'menu' 
+                      ? 'text-saffron-600' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                  onClick={() => setActiveTab('menu')}
+                >
+                  Menu
+                  {activeTab === 'menu' && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-saffron-500" />
+                  )}
+                </button>
+                <button
+                  className={`px-6 py-4 font-medium text-sm relative ${
+                    activeTab === 'reviews' 
+                      ? 'text-saffron-600' 
+                      : 'text-gray-600 hover:text-gray-800'
+                  }`}
+                  onClick={() => setActiveTab('reviews')}
+                >
+                  Reviews
+                  {activeTab === 'reviews' && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-saffron-500" />
+                  )}
+                </button>
               </div>
             </div>
             
-            {/* Dietary tags */}
-            {product.dietaryTags && product.dietaryTags.length > 0 && (
-              <div className="mb-6">
-                <DietaryTags 
-                  tags={product.dietaryTags.map((tag: string) => tag === 'vegetarian' ? 'satvik' : tag)} 
-                  size="sm" 
-                />
-              </div>
-            )}
-            
-            <div className="mb-6">
-              <h3 className="font-medium mb-2">Description</h3>
-              <p className="text-gray-600">{product.description}</p>
-              {product.description_np && (
-                <p className="text-gray-600 font-nepali mt-1">{product.description_np}</p>
-              )}
-            </div>
-            
-            {product.ingredients && (
-              <div className="mb-6">
-                <h3 className="font-medium mb-2">Ingredients</h3>
-                <div className="flex flex-wrap gap-1">
-                  {product.ingredients.map((ingredient: string, index: number) => (
-                    <span 
-                      key={index}
-                      className="bg-gray-100 px-2 py-1 text-sm rounded-md"
-                    >
-                      {ingredient}
-                    </span>
+            {/* Tab content */}
+            <div className="p-6">
+              {activeTab === 'menu' ? (
+                <div className="space-y-8">
+                  {menuCategories.map(category => (
+                    <div key={category.id}>
+                      <h3 className="font-medium text-lg mb-4 border-b pb-2">{category.name}</h3>
+                      <div className="space-y-4">
+                        {category.items.map(item => (
+                          <MenuItemCard key={item.id} item={item} restaurantId={restaurant.id} />
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
-            )}
-            
-            <div className="flex gap-4 mt-8">
-              <button className="bg-primary text-white px-6 py-3 rounded-md font-medium">
-                Add to Cart
-              </button>
-              <button className="border border-gray-300 px-6 py-3 rounded-md font-medium">
-                Save for Later
-              </button>
+              ) : (
+                <div>
+                  {/* Reviews content - placeholder */}
+                  <div className="text-center py-8">
+                    <Info size={48} className="mx-auto text-gray-300 mb-4" />
+                    <h3 className="font-medium text-lg mb-2">No reviews yet</h3>
+                    <p className="text-gray-600">Be the first to review this restaurant</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
