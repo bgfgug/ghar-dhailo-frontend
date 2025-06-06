@@ -1,10 +1,10 @@
 
-// This is a placeholder for Google Maps API integration
-// Replace the mockup functions with actual Google Maps API calls when you have the API key
+// Static mock implementation for Maps API - no Google Maps API key required
+// This provides all location and routing functionality with mock data
 
 import { OrderStatus } from "@/types/api";
 
-// Mock coordinates for demonstration (these are Kathmandu coordinates)
+// Mock coordinates for demonstration (Kathmandu area)
 const KATHMANDU_CENTER = { lat: 27.7172, lng: 85.3240 };
 
 interface Coordinates {
@@ -18,14 +18,39 @@ interface RouteInfo {
   path: Coordinates[];
 }
 
+interface LocationInfo {
+  name: string;
+  address: string;
+  coordinates: Coordinates;
+  landmark?: string;
+}
+
 // Mock delivery locations in Kathmandu area
 const mockLocations = {
-  restaurant: { lat: 27.7065, lng: 85.3206 }, // Thamel area
-  customer: { lat: 27.6980, lng: 85.3592 },  // Baneshwor area
-  driver: { lat: 27.7019, lng: 85.3370 }     // Somewhere in between
+  restaurant: { 
+    lat: 27.7065, 
+    lng: 85.3206,
+    name: "Kathmandu Kitchen",
+    address: "Thamel, Kathmandu",
+    landmark: "Near Durbar Square"
+  },
+  customer: { 
+    lat: 27.6980, 
+    lng: 85.3592,
+    name: "Customer Location",
+    address: "Baneshwor, Kathmandu", 
+    landmark: "Near Baneshwor Chowk"
+  },
+  driver: { 
+    lat: 27.7019, 
+    lng: 85.3370,
+    name: "Driver Location", 
+    address: "New Road, Kathmandu",
+    landmark: "Currently on route"
+  }
 };
 
-// Mock route path points
+// Mock route path points for realistic journey
 const mockRoutePath: Coordinates[] = [
   mockLocations.restaurant,
   { lat: 27.7050, lng: 85.3240 },
@@ -60,7 +85,7 @@ export const getDriverLocation = (): Coordinates => {
   return mockLocations.driver;
 };
 
-// Mock function to get restaurant location
+// Mock function to get restaurant location  
 export const getRestaurantLocation = (): Coordinates => {
   return mockLocations.restaurant;
 };
@@ -74,28 +99,66 @@ export const getCustomerLocation = (): Coordinates => {
 export const getRouteInfo = (): RouteInfo => {
   return {
     distance: "5.2 km",
-    duration: "18 mins",
+    duration: "18 mins", 
     path: mockRoutePath
   };
 };
 
-// Helper to check if Maps API is loaded - simplified for static version
+// Get location info with details
+export const getLocationInfo = (type: 'restaurant' | 'customer' | 'driver'): LocationInfo => {
+  const location = mockLocations[type];
+  return {
+    name: location.name,
+    address: location.address,
+    coordinates: { lat: location.lat, lng: location.lng },
+    landmark: location.landmark
+  };
+};
+
+// Calculate distance between two points (mock calculation)
+export const calculateDistance = (from: Coordinates, to: Coordinates): string => {
+  // Simple mock calculation
+  const distance = Math.sqrt(
+    Math.pow(to.lat - from.lat, 2) + Math.pow(to.lng - from.lng, 2)
+  ) * 111; // Rough km conversion
+  return `${distance.toFixed(1)} km`;
+};
+
+// Get nearby landmarks for a location
+export const getNearbyLandmarks = (location: Coordinates): string[] => {
+  return [
+    "Pashupatinath Temple",
+    "Dharahara Tower", 
+    "Kathmandu Durbar Square",
+    "Swayambhunath Stupa",
+    "Boudhanath Stupa"
+  ];
+};
+
+// Mock geocoding - convert address to coordinates
+export const geocodeAddress = (address: string): Promise<Coordinates> => {
+  return Promise.resolve({
+    lat: KATHMANDU_CENTER.lat + (Math.random() - 0.5) * 0.1,
+    lng: KATHMANDU_CENTER.lng + (Math.random() - 0.5) * 0.1
+  });
+};
+
+// Mock reverse geocoding - convert coordinates to address
+export const reverseGeocode = (coordinates: Coordinates): Promise<string> => {
+  return Promise.resolve(`Near ${coordinates.lat.toFixed(4)}, ${coordinates.lng.toFixed(4)}, Kathmandu`);
+};
+
+// Helper to check if Maps API is loaded - always false for static mode
 export const isMapsApiLoaded = (): boolean => {
-  // For static mode, we'll always return false so the API doesn't load
   return false;
 };
 
-// This will be updated with your actual API key
-export const GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY";
-
-// Function to load Google Maps API script - modified to work in static mode
+// Static mode - no actual API loading
 export const loadGoogleMapsApi = (callback: () => void) => {
-  // In static mode, we won't actually load the script
-  // The callback is still called to maintain API compatibility
   setTimeout(callback, 100);
 };
 
-// Add missing getOrderTracking function to fix the TS error
+// Order tracking with comprehensive mock data
 export const getOrderTracking = (orderId: string) => {
   return Promise.resolve({
     orderId,
@@ -105,9 +168,25 @@ export const getOrderTracking = (orderId: string) => {
     driverLocation: mockLocations.driver,
     driverName: "Rajesh Kumar",
     driverPhone: "+977-9801234567",
+    driverPhoto: "/placeholder.svg",
     estimatedDeliveryMinutes: 20,
     distanceRemaining: "2.5 km",
     route: mockRoutePath,
-    lastUpdated: new Date().toISOString()
+    orderItems: [
+      { name: "Dal Bhat Set", quantity: 2 },
+      { name: "Chicken Momo", quantity: 1 }
+    ],
+    totalAmount: 850,
+    lastUpdated: new Date().toISOString(),
+    deliveryInstructions: "Ring the bell twice",
+    timeline: [
+      { status: 'pending', time: '10:30 AM', completed: true },
+      { status: 'processing', time: '10:45 AM', completed: true },
+      { status: 'out_for_delivery', time: '11:15 AM', completed: true },
+      { status: 'delivered', time: '11:45 AM', completed: false }
+    ]
   });
 };
+
+// Remove Google Maps API key - not needed for static mode
+export const STATIC_MODE = true;

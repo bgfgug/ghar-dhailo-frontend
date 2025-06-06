@@ -1,3 +1,4 @@
+
 import { mockApiCall } from '@/utils/mockDelay';
 import { restaurants } from '@/data/restaurants';
 import { groceries } from '@/data/groceries';
@@ -5,7 +6,7 @@ import { categories } from '@/data/categories';
 import { promos } from '@/data/promos';
 import { festivals } from '@/data/festivals';
 import { OrderStatus, OrderTrackingInfo } from '@/types/api';
-import { getDriverLocation, getRestaurantLocation, getCustomerLocation, getRouteInfo, getEstimatedDeliveryTime } from '@/services/mapsApi';
+import { getOrderTracking as getMapsOrderTracking } from '@/services/mapsApi';
 
 // Base API service with common functionality
 const API_DELAY = 800; // Simulate network delay in ms
@@ -113,7 +114,7 @@ export const festivalApi = {
   }
 };
 
-// Order API
+// Enhanced Order API with comprehensive tracking
 export const orderApi = {
   submitOrder: async (orderData: any) => {
     // Simulate order submission
@@ -121,48 +122,83 @@ export const orderApi = {
     return mockApiCall({
       success: true,
       orderId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      estimatedDelivery: '30-45 minutes',
+      trackingUrl: `/order/tracking/${orderId}`
     }, 1500); // Longer delay for order submission
   },
   
   getOrderById: async (id: string) => {
-    // Mock order data (will be replaced with real API)
+    // Enhanced mock order data
     return mockApiCall({
       id,
-      status: 'processing',
-      items: [],
-      total: 0,
-      createdAt: new Date().toISOString()
+      status: 'processing' as OrderStatus,
+      items: [
+        { name: "Dal Bhat Set", quantity: 2, price: 350 },
+        { name: "Chicken Momo", quantity: 1, price: 200 }
+      ],
+      total: 550,
+      deliveryFee: 100,
+      grandTotal: 650,
+      restaurant: {
+        id: 'rest1',
+        name: 'Kathmandu Kitchen',
+        address: 'Thamel, Kathmandu'
+      },
+      customer: {
+        name: 'John Doe',
+        phone: '+977-9801234567',
+        address: 'Baneshwor, Kathmandu'
+      },
+      createdAt: new Date().toISOString(),
+      estimatedDelivery: new Date(Date.now() + 30 * 60 * 1000).toISOString()
     }, API_DELAY);
   },
   
   getUserOrders: async (userId: string) => {
-    // Mock user orders (will be replaced with real API)
-    return mockApiCall([], API_DELAY);
+    // Mock user order history
+    return mockApiCall([
+      {
+        id: 'ORDER123',
+        status: 'delivered',
+        total: 850,
+        restaurant: 'Kathmandu Kitchen',
+        createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: 'ORDER124',
+        status: 'processing',
+        total: 650,
+        restaurant: 'Himalayan Delights',
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
+      }
+    ], API_DELAY);
   },
   
-  getOrderTracking: (orderId: string) => {
-    // Import from mapsApi to reuse the mock data
-    const { 
-      getDriverLocation, 
-      getRestaurantLocation, 
-      getCustomerLocation, 
-      getRouteInfo,
-      getEstimatedDeliveryTime
-    } = require('./mapsApi');
-    
-    return Promise.resolve({
+  // Enhanced order tracking using maps service
+  getOrderTracking: async (orderId: string) => {
+    return getMapsOrderTracking(orderId);
+  },
+
+  // Cancel order
+  cancelOrder: async (orderId: string) => {
+    return mockApiCall({
+      success: true,
       orderId,
-      status: 'out_for_delivery',
-      restaurantLocation: getRestaurantLocation(),
-      customerLocation: getCustomerLocation(),
-      driverLocation: getDriverLocation(),
-      driverName: "Rajesh Kumar",
-      driverPhone: "+977-9801234567",
-      estimatedDeliveryMinutes: getEstimatedDeliveryTime('out_for_delivery'),
-      distanceRemaining: "2.5 km",
-      route: getRouteInfo().path,
-      lastUpdated: new Date().toISOString()
-    });
+      status: 'cancelled',
+      refundAmount: 650,
+      refundEta: '3-5 business days'
+    }, API_DELAY);
+  },
+
+  // Rate order
+  rateOrder: async (orderId: string, rating: number, comment?: string) => {
+    return mockApiCall({
+      success: true,
+      orderId,
+      rating,
+      comment,
+      timestamp: new Date().toISOString()
+    }, API_DELAY);
   }
 };

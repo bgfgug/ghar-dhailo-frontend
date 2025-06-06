@@ -2,10 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation } from "lucide-react";
+import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation, Phone, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from "@/components/ui/button";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -13,79 +14,35 @@ import EmptyState from '@/components/EmptyState';
 import GoogleMap from '@/components/map/GoogleMap';
 import DeliveryAnimation from '@/components/Cultural/DeliveryAnimation';
 import { OrderStatus } from '@/types/api';
-import {
-  getDriverLocation,
-  getRestaurantLocation,
-  getCustomerLocation,
-  getRouteInfo,
-  getEstimatedDeliveryTime
-} from '@/services/mapsApi';
+import { getOrderTracking } from '@/services/mapsApi';
 
 const OrderTracking = () => {
   const { orderId } = useParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('progress');
-  
-  // Mock order status - in real app this would come from API
-  const [orderStatus, setOrderStatus] = useState<OrderStatus>('out_for_delivery');
-  const currentStep = orderStatus === 'pending' ? 0 : 
-                     orderStatus === 'processing' ? 1 :
-                     orderStatus === 'out_for_delivery' ? 2 :
-                     orderStatus === 'delivered' ? 3 : 0;
-                     
-  const steps = [
-    { icon: Package, label: "Order Confirmed", time: "10:30 AM" },
-    { icon: Timer, label: "Preparing", time: "10:45 AM" },
-    { icon: Truck, label: "Out for Delivery", time: "11:15 AM" },
-    { icon: MapPin, label: "Delivered", time: "11:45 AM" }
-  ];
+  const [orderData, setOrderData] = useState<any>(null);
 
-  // Map related states
-  const [mapMarkers, setMapMarkers] = useState<any[]>([]);
-  const [mapPath, setMapPath] = useState<any[]>([]);
-  const [estimatedTime, setEstimatedTime] = useState<number>(0);
-  
-  // Setup map data
+  // Setup order data
   useEffect(() => {
-    if (!isLoading && !error) {
-      const restaurantLocation = getRestaurantLocation();
-      const customerLocation = getCustomerLocation();
-      const driverLocation = getDriverLocation();
-      const routeInfo = getRouteInfo();
-      
-      setMapMarkers([
-        {
-          position: restaurantLocation,
-          title: "Restaurant",
-          icon: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-        },
-        {
-          position: driverLocation,
-          title: "Delivery Driver",
-          icon: "https://maps.google.com/mapfiles/ms/icons/green-dot.png"
-        },
-        {
-          position: customerLocation,
-          title: "Delivery Location",
-          icon: "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
+    const fetchOrderData = async () => {
+      try {
+        if (orderId === "invalid") {
+          setError("Order not found");
+          setIsLoading(false);
+          return;
         }
-      ]);
-      
-      setMapPath(routeInfo.path);
-      setEstimatedTime(getEstimatedDeliveryTime(orderStatus));
-    }
-  }, [isLoading, error, orderStatus]);
 
-  // Simulate API loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (orderId === "invalid") {
-        setError("Order not found");
+        const data = await getOrderTracking(orderId || 'DEMO123');
+        setOrderData(data);
+        setIsLoading(false);
+      } catch (err) {
+        setError("Failed to load order data");
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 1500);
+    };
 
+    const timer = setTimeout(fetchOrderData, 1000);
     return () => clearTimeout(timer);
   }, [orderId]);
 
@@ -141,6 +98,38 @@ const OrderTracking = () => {
     );
   }
 
+  const { status, timeline, driverName, driverPhone, estimatedDeliveryMinutes, distanceRemaining, orderItems, totalAmount } = orderData;
+  
+  const currentStep = status === 'pending' ? 0 : 
+                     status === 'processing' ? 1 :
+                     status === 'out_for_delivery' ? 2 :
+                     status === 'delivered' ? 3 : 0;
+
+  const steps = [
+    { icon: Package, label: "Order Confirmed", time: timeline[0]?.time || "10:30 AM" },
+    { icon: Timer, label: "Preparing", time: timeline[1]?.time || "10:45 AM" },
+    { icon: Truck, label: "Out for Delivery", time: timeline[2]?.time || "11:15 AM" },
+    { icon: MapPin, label: "Delivered", time: timeline[3]?.time || "11:45 AM" }
+  ];
+
+  const mapMarkers = [
+    {
+      position: orderData.restaurantLocation,
+      title: "Restaurant - Kathmandu Kitchen",
+      color: "restaurant"
+    },
+    {
+      position: orderData.driverLocation,
+      title: `Driver - ${driverName}`,
+      color: "driver"
+    },
+    {
+      position: orderData.customerLocation,
+      title: "Your Location",
+      color: "customer"
+    }
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -152,13 +141,17 @@ const OrderTracking = () => {
                 <Clock className="h-5 w-5" />
                 Order #{orderId}
               </CardTitle>
+              <p className="text-sm text-muted-foreground">
+                {orderItems?.length} items • Rs. {totalAmount}
+              </p>
             </CardHeader>
             
             <CardContent>
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="mb-6 grid w-full grid-cols-2">
-                  <TabsTrigger value="progress">Order Progress</TabsTrigger>
-                  <TabsTrigger value="map">Live Tracking</TabsTrigger>
+                <TabsList className="mb-6 grid w-full grid-cols-3">
+                  <TabsTrigger value="progress">Progress</TabsTrigger>
+                  <TabsTrigger value="map">Live Map</TabsTrigger>
+                  <TabsTrigger value="animation">Journey</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="progress" className="mt-0">
@@ -208,16 +201,27 @@ const OrderTracking = () => {
                     })}
                   </div>
                   
-                  {orderStatus === 'out_for_delivery' && (
+                  {status === 'out_for_delivery' && (
                     <div className="mt-6 pt-6 border-t border-border">
-                      <div className="flex items-center justify-between">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <p className="text-sm text-muted-foreground">Estimated Delivery Time</p>
-                          <p className="text-xl font-semibold">{estimatedTime} minutes</p>
+                          <p className="text-sm text-muted-foreground">Estimated Delivery</p>
+                          <p className="text-xl font-semibold">{estimatedDeliveryMinutes} minutes</p>
                         </div>
-                        <Button variant="outline" onClick={() => setActiveTab('map')}>
+                        <div>
+                          <p className="text-sm text-muted-foreground">Distance Remaining</p>
+                          <p className="text-xl font-semibold">{distanceRemaining}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-2 mt-4">
+                        <Button variant="outline" onClick={() => setActiveTab('map')} className="flex-1">
                           <Navigation className="h-4 w-4 mr-2" />
                           Track on Map
+                        </Button>
+                        <Button variant="outline" onClick={() => setActiveTab('animation')} className="flex-1">
+                          <Truck className="h-4 w-4 mr-2" />
+                          View Journey
                         </Button>
                       </div>
                     </div>
@@ -229,43 +233,67 @@ const OrderTracking = () => {
                     <div className="aspect-[4/3] w-full rounded-lg overflow-hidden border">
                       <GoogleMap 
                         markers={mapMarkers}
-                        path={mapPath}
-                        center={mapMarkers[1]?.position || { lat: 27.7172, lng: 85.3240 }}
+                        path={orderData.route}
+                        center={orderData.driverLocation}
                         className="w-full h-full"
-                        staticMode={true} // Use static mode
+                        showControls={true}
+                        showLandmarks={true}
                       />
                     </div>
                     
                     <div className="bg-muted/30 p-4 rounded-lg">
                       <div className="flex justify-between items-center mb-4">
                         <div>
-                          <p className="text-sm font-medium">Driver is on the way</p>
-                          <p className="text-xl font-bold">
-                            Arriving in {estimatedTime} minutes
+                          <p className="text-sm font-medium">Driver Information</p>
+                          <p className="text-lg font-bold flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            {driverName}
                           </p>
                         </div>
-                        <div className="bg-primary/10 text-primary p-3 rounded-full">
-                          <Truck className="h-6 w-6" />
-                        </div>
+                        <Button variant="outline" size="sm">
+                          <Phone className="h-4 w-4 mr-2" />
+                          Call Driver
+                        </Button>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-4 mt-2">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-muted-foreground">Distance</p>
-                          <p className="font-medium">5.2 km away</p>
+                          <p className="font-medium">{distanceRemaining}</p>
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Order Status</p>
-                          <p className="font-medium capitalize">
-                            {orderStatus.replace('_', ' ')}
-                          </p>
+                          <p className="text-sm text-muted-foreground">ETA</p>
+                          <p className="font-medium">{estimatedDeliveryMinutes} mins</p>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="animation" className="mt-0">
+                  <div className="space-y-4">
+                    <DeliveryAnimation 
+                      initialEta={estimatedDeliveryMinutes} 
+                      autoPlay={status === 'out_for_delivery'} 
+                      compact={false}
+                    />
                     
-                    {/* Added Nepali-themed delivery animation for additional visual feedback */}
-                    <div className="mt-6">
-                      <DeliveryAnimation initialEta={estimatedTime} autoPlay={true} />
+                    <div className="bg-muted/30 p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">Your Order Journey</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Follow your delivery as it travels through the beautiful streets of Kathmandu
+                      </p>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <span className="text-muted-foreground">From:</span>
+                          <p className="font-medium">Thamel, Kathmandu</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">To:</span>
+                          <p className="font-medium">Baneshwor, Kathmandu</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </TabsContent>
@@ -278,8 +306,5 @@ const OrderTracking = () => {
     </div>
   );
 };
-
-// Missing Button component import
-import { Button } from "@/components/ui/button";
 
 export default OrderTracking;

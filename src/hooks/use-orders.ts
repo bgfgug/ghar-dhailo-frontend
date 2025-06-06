@@ -2,7 +2,14 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { orderApi } from '@/services/api';
 import { OrderStatus } from '@/types/api';
-import { getEstimatedDeliveryTime, getRouteInfo, getDriverLocation } from '@/services/mapsApi';
+import { 
+  getEstimatedDeliveryTime, 
+  getRouteInfo, 
+  getDriverLocation,
+  getOrderTracking,
+  calculateDistance,
+  getLocationInfo
+} from '@/services/mapsApi';
 
 export function useSubmitOrder() {
   return useMutation({
@@ -26,43 +33,68 @@ export function useUserOrders(userId: string) {
   });
 }
 
-// New hooks for tracking functionality
-
+// Enhanced order tracking with real-time updates
 export function useOrderTracking(orderId: string) {
   return useQuery({
     queryKey: ['order', orderId, 'tracking'],
-    queryFn: () => orderApi.getOrderTracking(orderId),
+    queryFn: () => getOrderTracking(orderId),
     enabled: !!orderId,
-    // Real-time updates - refetch frequently when tracking an active order
-    refetchInterval: 10000, // 10 seconds
+    refetchInterval: (data) => {
+      // Stop refetching if order is delivered or cancelled
+      const status = data?.status;
+      return (status === 'delivered' || status === 'cancelled') ? false : 10000;
+    },
   });
 }
 
+// Driver location tracking
 export function useDriverLocation(driverId: string) {
   return useQuery({
     queryKey: ['driver', driverId, 'location'],
     queryFn: () => {
-      // This would be replaced with actual API call when you have the Google Maps API key
       return Promise.resolve(getDriverLocation());
     },
     enabled: !!driverId,
-    // Real-time updates - refetch frequently for driver location
-    refetchInterval: 5000, // 5 seconds
+    refetchInterval: 5000, // 5 seconds for real-time tracking
   });
 }
 
+// Delivery estimates with route calculation
 export function useDeliveryEstimate(orderId: string, status: OrderStatus) {
   return useQuery({
     queryKey: ['order', orderId, 'estimate'],
     queryFn: () => {
-      // This would be replaced with actual API call when you have the Google Maps API
+      const routeInfo = getRouteInfo();
       return Promise.resolve({
         estimatedMinutes: getEstimatedDeliveryTime(status),
-        route: getRouteInfo()
+        route: routeInfo,
+        distance: routeInfo.distance,
+        duration: routeInfo.duration
       });
     },
     enabled: !!orderId && (status === 'out_for_delivery' || status === 'processing'),
-    // Less frequent updates for estimates
     refetchInterval: 30000, // 30 seconds
+  });
+}
+
+// Location information
+export function useLocationInfo(type: 'restaurant' | 'customer' | 'driver') {
+  return useQuery({
+    queryKey: ['location', type],
+    queryFn: () => Promise.resolve(getLocationInfo(type)),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+// Distance calculation between locations
+export function useDistanceCalculation(from?: { lat: number; lng: number }, to?: { lat: number; lng: number }) {
+  return useQuery({
+    queryKey: ['distance', from, to],
+    queryFn: () => {
+      if (!from || !to) return Promise.resolve('0 km');
+      return Promise.resolve(calculateDistance(from, to));
+    },
+    enabled: !!(from && to),
+    staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
