@@ -1,26 +1,37 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, ShoppingBag, Menu, X, MapPin } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Search, ShoppingBag, Menu, X, MapPin, LogOut, User } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { useCart } from '@/context/CartContext';
 import { useLocation } from '@/context/LocationContext';
+import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const { getItemCount } = useCart();
   const { currentLocation, locations, setCurrentLocation } = useLocation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const toggleLocation = () => setIsLocationOpen(!isLocationOpen);
+  const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login');
+    setIsUserMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 bg-white border-b border-gray-200 z-50 shadow-sm">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/home" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full festival-gradient flex items-center justify-center">
               <span className="text-white font-bold">GD</span>
             </div>
@@ -29,7 +40,7 @@ const Header = () => {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-gray-600 hover:text-saffron-600 transition-colors">
+            <Link to="/home" className="text-gray-600 hover:text-saffron-600 transition-colors">
               Home
             </Link>
             <Link to="/listings" className="text-gray-600 hover:text-saffron-600 transition-colors">
@@ -55,7 +66,6 @@ const Header = () => {
                 <span>{currentLocation.name}</span>
               </button>
 
-              {/* Dropdown */}
               {isLocationOpen && (
                 <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 py-1">
                   {locations.map((location) => (
@@ -83,6 +93,33 @@ const Header = () => {
                 </span>
               )}
             </Link>
+
+            {/* User menu */}
+            <div className="relative">
+              <button 
+                onClick={toggleUserMenu}
+                className="flex items-center gap-2 text-gray-700 hover:text-saffron-600 transition-colors"
+              >
+                <User size={18} />
+                <span className="hidden sm:block">{user?.name}</span>
+              </button>
+
+              {isUserMenuOpen && (
+                <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50 py-1">
+                  <div className="px-4 py-2 border-b">
+                    <p className="font-medium">{user?.name}</p>
+                    <p className="text-sm text-gray-500">{user?.email}</p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 hover:bg-red-50 text-red-600 flex items-center gap-2"
+                  >
+                    <LogOut size={16} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
 
             {/* Mobile menu toggle */}
             <Button 
@@ -113,7 +150,7 @@ const Header = () => {
           <div className="md:hidden mt-4 bg-white border-t border-gray-200 animate-slide-down">
             <div className="flex flex-col space-y-3 py-4">
               <Link 
-                to="/" 
+                to="/home" 
                 onClick={() => setIsMenuOpen(false)}
                 className="px-4 py-2 hover:bg-gray-100 transition-colors"
               >
@@ -140,6 +177,18 @@ const Header = () => {
               >
                 About
               </Link>
+              
+              {/* Mobile logout */}
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setIsMenuOpen(false);
+                }}
+                className="px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+              >
+                <LogOut size={16} />
+                Logout
+              </button>
               
               {/* Mobile location selector */}
               <div className="px-4 py-2">

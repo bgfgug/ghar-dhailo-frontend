@@ -33,9 +33,14 @@ const Onboarding = () => {
   const [currentSlide, setCurrentSlide] = useState(0)
   const navigate = useNavigate()
 
+  const completeOnboarding = () => {
+    localStorage.setItem('onboarding_complete', 'true');
+    navigate('/auth/login');
+  };
+
   const nextSlide = () => {
     if (currentSlide === slides.length - 1) {
-      navigate('/auth/login')
+      completeOnboarding();
     } else {
       setCurrentSlide(prev => prev + 1)
     }
@@ -46,7 +51,7 @@ const Onboarding = () => {
   }
 
   const skipOnboarding = () => {
-    navigate('/auth/login')
+    completeOnboarding();
   }
 
   return (

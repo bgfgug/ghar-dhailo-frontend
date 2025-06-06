@@ -33,24 +33,31 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   // Check if user is already logged in (from localStorage)
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (e) {
-        localStorage.removeItem('user');
+    const checkAuthStatus = () => {
+      const userToken = localStorage.getItem('user_token');
+      const storedUser = localStorage.getItem('user');
+      
+      if (userToken && storedUser) {
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+          setIsAuthenticated(true);
+        } catch (e) {
+          localStorage.removeItem('user_token');
+          localStorage.removeItem('user');
+        }
       }
-    }
+      setIsLoading(false);
+    };
+
+    checkAuthStatus();
   }, []);
 
-  // Simulated login function (will connect to real API later)
   const login = async (email: string, password: string, role: UserRole = 'user') => {
     setIsLoading(true);
     setError(null);
@@ -59,14 +66,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // For demo purposes, we'll accept any email/password and use the requested role
-      // In a real app, this would validate credentials against an API
-      
       if (!email.includes('@') || password.length < 6) {
         throw new Error('Invalid credentials');
       }
       
-      // Create mock user based on role
       const mockUser: User = {
         id: Math.random().toString(36).substring(2, 9),
         name: email.split('@')[0],
@@ -74,7 +77,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         role
       };
       
+      const userToken = `token_${Date.now()}_${mockUser.id}`;
+      
       // Store in localStorage for persistence
+      localStorage.setItem('user_token', userToken);
       localStorage.setItem('user', JSON.stringify(mockUser));
       
       setUser(mockUser);
@@ -89,6 +95,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
+    localStorage.removeItem('user_token');
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);

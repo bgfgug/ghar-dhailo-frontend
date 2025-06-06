@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const { login, isLoading } = useAuth();
 
@@ -41,7 +42,9 @@ const Login = () => {
 
   const handleContinue = () => {
     setShowWelcome(false);
-    navigate('/home');
+    // Navigate to the intended route or home
+    const from = location.state?.from?.pathname || '/home';
+    navigate(from, { replace: true });
   };
 
   return (

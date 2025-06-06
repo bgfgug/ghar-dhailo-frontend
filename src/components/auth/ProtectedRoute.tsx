@@ -8,12 +8,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   allowedRoles?: Array<'user' | 'admin' | 'driver'>;
   redirectPath?: string;
+  requireAuth?: boolean;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   allowedRoles = ['user', 'admin', 'driver'],
-  redirectPath = '/auth/login'
+  redirectPath = '/auth/login',
+  requireAuth = true
 }) => {
   const { isAuthenticated, user, isLoading } = useAuth();
   const location = useLocation();
@@ -29,13 +31,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
   
-  if (!isAuthenticated) {
+  // Check if authentication is required
+  if (requireAuth && !isAuthenticated) {
     // Save the location the user was trying to access for redirect after login
     return <Navigate to={redirectPath} state={{ from: location }} replace />;
   }
   
-  // Check role-based access
-  if (user && !allowedRoles.includes(user.role)) {
+  // Check role-based access if user is authenticated
+  if (isAuthenticated && user && !allowedRoles.includes(user.role)) {
     // Redirect based on role
     if (user.role === 'admin') {
       return <Navigate to="/admin/dashboard" replace />;
