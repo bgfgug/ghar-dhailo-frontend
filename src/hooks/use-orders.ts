@@ -39,10 +39,10 @@ export function useOrderTracking(orderId: string) {
     queryKey: ['order', orderId, 'tracking'],
     queryFn: () => getOrderTracking(orderId),
     enabled: !!orderId,
-    refetchInterval: (data) => {
+    refetchInterval: (query) => {
       // Stop refetching if order is delivered or cancelled
-      if (!data) return false;
-      const status = data.status;
+      if (!query.state.data) return false;
+      const status = query.state.data.status;
       return (status === 'delivered' || status === 'cancelled') ? false : 10000;
     },
   });
