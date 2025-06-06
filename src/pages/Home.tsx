@@ -1,4 +1,6 @@
+
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import EmergencyBanner from '@/components/EmergencyBanner';
@@ -8,10 +10,24 @@ import RestaurantCard from '@/components/RestaurantCard';
 import { restaurants } from '@/data/restaurants';
 
 const Home = () => {
+  const navigate = useNavigate();
+  
   // Filter popular restaurants (high rating)
   const popularRestaurants = restaurants
     .filter(restaurant => restaurant.rating >= 4.5)
     .slice(0, 3);
+
+  const handleOrderFood = () => {
+    navigate('/listings');
+  };
+
+  const handleShopGroceries = () => {
+    navigate('/grocery');
+  };
+
+  const handleViewAllRestaurants = () => {
+    navigate('/listings');
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -38,10 +54,16 @@ const Home = () => {
                 Authentic Nepali cuisine and groceries delivered to your doorstep
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="bg-white text-crimson-500 hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium">
+                <button 
+                  onClick={handleOrderFood}
+                  className="bg-white text-crimson-500 hover:bg-gray-100 transition-colors px-6 py-3 rounded-md font-medium"
+                >
                   Order Food
                 </button>
-                <button className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors px-6 py-3 rounded-md font-medium text-white">
+                <button 
+                  onClick={handleShopGroceries}
+                  className="bg-white/20 backdrop-blur-sm hover:bg-white/30 transition-colors px-6 py-3 rounded-md font-medium text-white"
+                >
                   Shop Groceries
                 </button>
               </div>
@@ -69,9 +91,12 @@ const Home = () => {
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-semibold">Popular Restaurants</h2>
-              <a href="/listings" className="text-saffron-600 hover:text-saffron-700 font-medium">
+              <button 
+                onClick={handleViewAllRestaurants}
+                className="text-saffron-600 hover:text-saffron-700 font-medium"
+              >
                 View All
-              </a>
+              </button>
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

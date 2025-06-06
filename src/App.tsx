@@ -62,9 +62,12 @@ const App = () => (
           <CartProvider>
             <BrowserRouter>
               <Routes>
-                {/* Public routes */}
+                {/* Root and splash routes */}
                 <Route path="/" element={<Splash />} />
+                <Route path="/splash" element={<Splash />} />
                 <Route path="/onboarding" element={<Onboarding />} />
+                
+                {/* Authentication routes */}
                 <Route path="/auth/login" element={<Login />} />
                 <Route path="/auth/signup" element={<Signup />} />
                 <Route path="/auth/forgot-password" element={<ForgotPassword />} />
@@ -134,7 +137,7 @@ const App = () => (
                   } 
                 />
                 
-                {/* User routes - Home is the main landing page for authenticated users */}
+                {/* User routes - Protected main app pages */}
                 <Route 
                   path="/home" 
                   element={
