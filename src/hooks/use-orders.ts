@@ -41,7 +41,8 @@ export function useOrderTracking(orderId: string) {
     enabled: !!orderId,
     refetchInterval: (data) => {
       // Stop refetching if order is delivered or cancelled
-      const status = data?.status;
+      if (!data) return false;
+      const status = data.status;
       return (status === 'delivered' || status === 'cancelled') ? false : 10000;
     },
   });
