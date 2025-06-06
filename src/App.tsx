@@ -134,7 +134,7 @@ const App = () => (
                   } 
                 />
                 
-                {/* User routes */}
+                {/* User routes - Home is the main landing page for authenticated users */}
                 <Route 
                   path="/home" 
                   element={

@@ -1,9 +1,9 @@
+
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { useNavigate } from "react-router-dom"
 import { ChevronRight, ChevronLeft } from "lucide-react"
-import React, { lazy } from 'react'
 
 interface Slide {
   title: string;
@@ -48,9 +48,6 @@ const Onboarding = () => {
   const skipOnboarding = () => {
     navigate('/auth/login')
   }
-
-  // Import the new components
-  const DeliveryAnimationDemo = React.lazy(() => import('@/components/Cultural/DeliveryAnimationDemo'));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,23 +98,6 @@ const Onboarding = () => {
           </Button>
         </div>
       </div>
-
-      {/* Optional: Add the delivery animation showcase section */}
-      <section className="py-12 bg-white border-t">
-        <div className="container px-4 mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-2">Experience Our Cultural Delivery Journey</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Watch as your order travels through iconic Nepali landmarks, bringing the authentic
-              experience right to your doorstep.
-            </p>
-          </div>
-          
-          <React.Suspense fallback={<div className="w-full h-60 bg-gray-100 animate-pulse rounded-lg"></div>}>
-            <DeliveryAnimationDemo />
-          </React.Suspense>
-        </div>
-      </section>
     </div>
   )
 }
