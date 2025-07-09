@@ -1,14 +1,25 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import GroceryCard from '@/components/GroceryCard';
+import GroceryCardSkeleton from '@/components/ui/skeletons/GroceryCardSkeleton';
 import { groceries, groceryCategories } from '@/data/groceries';
-import { Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 const GroceryHub = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, []);
   
   // Filter groceries based on category and search term
   const filteredGroceries = groceries.filter(item => {
@@ -71,7 +82,13 @@ const GroceryHub = () => {
           </div>
           
           {/* Grocery grid */}
-          {filteredGroceries.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <GroceryCardSkeleton key={index} />
+              ))}
+            </div>
+          ) : filteredGroceries.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {filteredGroceries.map(item => (
                 <GroceryCard key={item.id} item={item} />

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,15 +7,26 @@ import EmergencyBanner from '@/components/EmergencyBanner';
 import PromoCarousel from '@/components/PromoCarousel';
 import CategoryGrid from '@/components/CategoryGrid';
 import RestaurantCard from '@/components/RestaurantCard';
+import RestaurantCardSkeleton from '@/components/ui/skeletons/RestaurantCardSkeleton';
 import { restaurants } from '@/data/restaurants';
 
 const Home = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   
   // Filter popular restaurants (high rating)
   const popularRestaurants = restaurants
     .filter(restaurant => restaurant.rating >= 4.5)
     .slice(0, 3);
+
+  useEffect(() => {
+    // Simulate loading delay
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleOrderFood = () => {
     navigate('/listings');
@@ -100,9 +111,14 @@ const Home = () => {
             </div>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {popularRestaurants.map((restaurant) => (
-                <RestaurantCard key={restaurant.id} restaurant={restaurant} />
-              ))}
+              {isLoading 
+                ? Array.from({ length: 3 }).map((_, index) => (
+                    <RestaurantCardSkeleton key={index} />
+                  ))
+                : popularRestaurants.map((restaurant) => (
+                    <RestaurantCard key={restaurant.id} restaurant={restaurant} />
+                  ))
+              }
             </div>
           </div>
         </section>

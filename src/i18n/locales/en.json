@@ -1,0 +1,75 @@
+
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Try Again",
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "search": "Search",
+    "filter": "Filter",
+    "clear": "Clear"
+  },
+  "nav": {
+    "home": "Home",
+    "restaurants": "Restaurants", 
+    "grocery": "Grocery",
+    "cart": "Cart",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "home": {
+    "title": "From Our Kitchen to Your Home",
+    "subtitle": "Authentic Nepali cuisine and groceries delivered to your doorstep",
+    "orderFood": "Order Food",
+    "shopGroceries": "Shop Groceries",
+    "categories": "Categories",
+    "popularRestaurants": "Popular Restaurants",
+    "viewAll": "View All",
+    "howItWorks": "How Ghar Dhailo Works",
+    "step1": {
+      "title": "Choose What You Want",
+      "description": "Browse through our selection of restaurants and grocery items"
+    },
+    "step2": {
+      "title": "Place Your Order", 
+      "description": "Select your items, add to cart, and choose your delivery details"
+    },
+    "step3": {
+      "title": "Enjoy Your Delivery",
+      "description": "Sit back and relax as we deliver your order to your doorstep"
+    }
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "dontHaveAccount": "Don't have an account?",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "cart": {
+    "title": "Your Cart",
+    "empty": "Your cart is empty",
+    "emptyDescription": "Looks like you haven't added any items yet",
+    "startShopping": "Start Shopping",
+    "subtotal": "Subtotal",
+    "deliveryFee": "Delivery Fee",
+    "total": "Total",
+    "proceedToCheckout": "Proceed to Checkout"
+  },
+  "profile": {
+    "editProfile": "Edit Profile",
+    "changePhoto": "Change Photo",
+    "fullName": "Full Name",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "address": "Address",
+    "bio": "Bio (Optional)",
+    "saveChanges": "Save Changes",
+    "profileUpdated": "Profile Updated",
+    "profileUpdateSuccess": "Your profile has been updated successfully."
+  }
+}
