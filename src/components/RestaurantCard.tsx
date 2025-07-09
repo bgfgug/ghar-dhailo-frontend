@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Star, Clock } from 'lucide-react';
 import { Restaurant } from '@/data/restaurants';
 import formatPrice from '@/utils/formatPrice';
+import OptimizedImage from '@/components/ui/optimized-image';
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
@@ -11,11 +12,15 @@ interface RestaurantCardProps {
 
 const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
   return (
-    <Link to={`/product/${restaurant.id}`} className="nepal-card">
+    <Link 
+      to={`/product/${restaurant.id}`} 
+      className="nepal-card"
+      aria-label={`View ${restaurant.name} restaurant details`}
+    >
       <div className="aspect-[4/3] overflow-hidden relative">
-        <img 
+        <OptimizedImage
           src={restaurant.image} 
-          alt={restaurant.name}
+          alt={`${restaurant.name} restaurant`}
           className="w-full h-full object-cover"
         />
         {/* Cuisine tags */}
@@ -39,18 +44,18 @@ const RestaurantCard = ({ restaurant }: RestaurantCardProps) => {
               <p className="text-sm text-gray-500 font-nepali">{restaurant.name_np}</p>
             )}
           </div>
-          <div className="flex items-center bg-green-50 px-2 py-1 rounded">
-            <Star size={14} className="text-green-600 mr-1" />
+          <div className="flex items-center bg-green-50 px-2 py-1 rounded" role="img" aria-label={`Rating: ${restaurant.rating} stars`}>
+            <Star size={14} className="text-green-600 mr-1" aria-hidden="true" />
             <span className="text-sm text-green-700 font-medium">{restaurant.rating}</span>
           </div>
         </div>
 
-        <div className="mt-2 flex items-center text-sm text-gray-500">
-          <Clock size={14} className="mr-1" />
+        <div className="mt-2 flex items-center text-sm text-gray-500" aria-label="Delivery information">
+          <Clock size={14} className="mr-1" aria-hidden="true" />
           <span>{restaurant.deliveryTime} mins</span>
-          <span className="mx-2">•</span>
+          <span className="mx-2" aria-hidden="true">•</span>
           <span>{restaurant.distance} km</span>
-          <span className="mx-2">•</span>
+          <span className="mx-2" aria-hidden="true">•</span>
           <span>{formatPrice(restaurant.deliveryFee)} delivery</span>
         </div>
       </div>
