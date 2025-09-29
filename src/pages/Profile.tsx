@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Camera, User, Mail, Phone, MapPin, Save } from 'lucide-react';
+import { ArrowLeft, Camera, User, Mail, Phone, MapPin, Save, History } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,10 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useLoading } from '@/hooks/use-loading';
+import OrderHistory from '@/components/OrderHistory';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -78,7 +80,20 @@ const Profile = () => {
           </div>
           
           <div className="bg-white rounded-lg shadow-sm p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <Tabs defaultValue="profile" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="profile" className="flex items-center gap-2">
+                  <User size={16} />
+                  Profile
+                </TabsTrigger>
+                <TabsTrigger value="orders" className="flex items-center gap-2">
+                  <History size={16} />
+                  Order History
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="profile" className="mt-6">
+                <form onSubmit={handleSubmit} className="space-y-6">
               {/* Avatar Section */}
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-24 w-24">
@@ -206,6 +221,12 @@ const Profile = () => {
                 </Button>
               </div>
             </form>
+              </TabsContent>
+              
+              <TabsContent value="orders" className="mt-6">
+                <OrderHistory />
+              </TabsContent>
+            </Tabs>
           </div>
         </div>
       </main>

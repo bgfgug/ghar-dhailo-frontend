@@ -13,6 +13,10 @@ import ErrorBoundary from "@/components/ErrorBoundary"
 import LazyRoute from "@/components/lazy-route"
 import SkipLink from "@/components/ui/skip-link"
 
+// Initialize monitoring systems
+import '@/utils/analytics'
+import '@/utils/errorMonitoring'
+
 // Import lazy-loaded components
 import {
   LazyHome,
