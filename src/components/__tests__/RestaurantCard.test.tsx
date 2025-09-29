@@ -1,5 +1,5 @@
 
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import RestaurantCard from '../RestaurantCard';
 import { restaurants } from '@/data/restaurants';
@@ -16,25 +16,25 @@ const renderWithRouter = (component: React.ReactElement) => {
 
 describe('RestaurantCard', () => {
   test('renders restaurant information correctly', () => {
-    renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
+    const { getByText } = renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
     
-    expect(screen.getByText(mockRestaurant.name)).toBeInTheDocument();
-    expect(screen.getByText(mockRestaurant.rating.toString())).toBeInTheDocument();
-    expect(screen.getByText(`${mockRestaurant.deliveryTime} mins`)).toBeInTheDocument();
+    expect(getByText(mockRestaurant.name)).toBeInTheDocument();
+    expect(getByText(mockRestaurant.rating.toString())).toBeInTheDocument();
+    expect(getByText(`${mockRestaurant.deliveryTime} mins`)).toBeInTheDocument();
   });
 
   test('displays cuisine tags', () => {
-    renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
+    const { getByText } = renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
     
     mockRestaurant.cuisine.forEach(cuisine => {
-      expect(screen.getByText(cuisine)).toBeInTheDocument();
+      expect(getByText(cuisine)).toBeInTheDocument();
     });
   });
 
   test('has correct link to restaurant detail page', () => {
-    renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
+    const { getByRole } = renderWithRouter(<RestaurantCard restaurant={mockRestaurant} />);
     
-    const link = screen.getByRole('link');
+    const link = getByRole('link');
     expect(link).toHaveAttribute('href', `/product/${mockRestaurant.id}`);
   });
 });

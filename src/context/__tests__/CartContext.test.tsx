@@ -1,15 +1,15 @@
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { CartProvider, useCart } from '../CartContext';
 import { groceries } from '@/data/groceries';
 
 const TestComponent = () => {
-  const { items, addItem, updateQuantity, removeItem, getTotalPrice } = useCart();
+  const { items, addItem, updateQuantity, removeItem, getTotal } = useCart();
   
   return (
     <div>
       <div data-testid="cart-count">{items.length}</div>
-      <div data-testid="total-price">{getTotalPrice()}</div>
+      <div data-testid="total-price">{getTotal()}</div>
       <button 
         onClick={() => addItem(groceries[0], 'grocery')}
         data-testid="add-item"
@@ -34,39 +34,39 @@ const TestComponent = () => {
 
 describe('CartContext', () => {
   test('starts with empty cart', () => {
-    render(
+    const { getByTestId } = render(
       <CartProvider>
         <TestComponent />
       </CartProvider>
     );
     
-    expect(screen.getByTestId('cart-count')).toHaveTextContent('0');
-    expect(screen.getByTestId('total-price')).toHaveTextContent('0');
+    expect(getByTestId('cart-count')).toHaveTextContent('0');
+    expect(getByTestId('total-price')).toHaveTextContent('0');
   });
 
   test('adds item to cart', () => {
-    render(
+    const { getByTestId } = render(
       <CartProvider>
         <TestComponent />
       </CartProvider>
     );
     
-    fireEvent.click(screen.getByTestId('add-item'));
-    expect(screen.getByTestId('cart-count')).toHaveTextContent('1');
+    getByTestId('add-item').click();
+    expect(getByTestId('cart-count')).toHaveTextContent('1');
   });
 
   test('updates item quantity', () => {
-    render(
+    const { getByTestId } = render(
       <CartProvider>
         <TestComponent />
       </CartProvider>
     );
     
-    fireEvent.click(screen.getByTestId('add-item'));
-    fireEvent.click(screen.getByTestId('update-quantity'));
+    getByTestId('add-item').click();
+    getByTestId('update-quantity').click();
     
     // Total price should reflect quantity change
-    const totalPrice = parseFloat(screen.getByTestId('total-price').textContent || '0');
+    const totalPrice = parseFloat(getByTestId('total-price').textContent || '0');
     expect(totalPrice).toBeGreaterThan(0);
   });
 });
