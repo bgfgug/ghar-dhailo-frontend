@@ -160,8 +160,22 @@ export const loadGoogleMapsApi = (callback: () => void) => {
 
 // Order tracking with comprehensive mock data
 export const getOrderTracking = (orderId: string) => {
+  // Get current user ID from localStorage for demo purposes
+  // In production, this would come from the backend API
+  let mockUserId = "user-123";
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      mockUserId = user.id;
+    }
+  } catch (e) {
+    // Fallback to default if localStorage is not available
+  }
+  
   return Promise.resolve({
     orderId,
+    userId: mockUserId, // Add userId for order ownership verification
     status: 'out_for_delivery' as OrderStatus,
     restaurantLocation: mockLocations.restaurant,
     customerLocation: mockLocations.customer,

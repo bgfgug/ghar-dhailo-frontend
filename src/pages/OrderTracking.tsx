@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation, Phone, User, Share2, HelpCircle, CheckCircle2, MapPinOff } from "lucide-react";
+import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation, Phone, User, Share2, HelpCircle, CheckCircle2, MapPinOff, ShieldAlert } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,9 +23,12 @@ import { getOrderTracking } from '@/services/mapsApi';
 import { useMockLocation } from '@/hooks/useMockLocation';
 import { useUserLocation } from '@/hooks/useUserLocation';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/context/AuthContext';
 
 const OrderTracking = () => {
   const { orderId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('progress');
@@ -43,7 +46,7 @@ const OrderTracking = () => {
     orderData?.status || 'processing'
   );
 
-  // Setup order data
+  // Setup order data and verify ownership
   useEffect(() => {
     const fetchOrderData = async () => {
       try {
@@ -54,6 +57,20 @@ const OrderTracking = () => {
         }
 
         const data = await getOrderTracking(orderId || 'DEMO123');
+        
+        // Verify order ownership - user can only view their own orders
+        if (data.userId && user?.id && data.userId !== user.id) {
+          setError("unauthorized");
+          setIsLoading(false);
+          toast({
+            title: "Access Denied",
+            description: "You can only view your own orders",
+            variant: "destructive"
+          });
+          setTimeout(() => navigate('/home'), 2000);
+          return;
+        }
+        
         setOrderData(data);
         setIsLoading(false);
       } catch (err) {
@@ -64,7 +81,7 @@ const OrderTracking = () => {
 
     const timer = setTimeout(fetchOrderData, 1000);
     return () => clearTimeout(timer);
-  }, [orderId]);
+  }, [orderId, user, navigate, toast]);
 
   if (isLoading) {
     return (
@@ -101,14 +118,17 @@ const OrderTracking = () => {
   }
 
   if (error) {
+    const isUnauthorized = error === "unauthorized";
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <div className="p-4 max-w-md mx-auto mt-8">
           <EmptyState 
-            icon={SearchX}
-            title="Order Not Found"
-            description="We couldn't find the order you're looking for."
+            icon={isUnauthorized ? ShieldAlert : SearchX}
+            title={isUnauthorized ? "Access Denied" : "Order Not Found"}
+            description={isUnauthorized 
+              ? "You don't have permission to view this order. Redirecting..." 
+              : "We couldn't find the order you're looking for."}
             actionLabel="Back to Home"
             actionLink="/home"
           />
