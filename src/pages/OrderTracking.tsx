@@ -2,19 +2,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation, Phone, User } from "lucide-react";
+import { MapPin, Package, Truck, Timer, Clock, SearchX, Navigation, Phone, User, Share2, HelpCircle, CheckCircle2, MapPinOff } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import EmptyState from '@/components/EmptyState';
 import GoogleMap from '@/components/map/GoogleMap';
 import DeliveryAnimation from '@/components/Cultural/DeliveryAnimation';
+import SupportChatModal from '@/components/tracking/SupportChatModal';
+import ProgressBar from '@/components/tracking/ProgressBar';
+import CountdownTimer from '@/components/tracking/CountdownTimer';
 import { OrderStatus } from '@/types/api';
 import { getOrderTracking } from '@/services/mapsApi';
+import { useMockLocation } from '@/hooks/useMockLocation';
+import { useUserLocation } from '@/hooks/useUserLocation';
+import { useToast } from '@/hooks/use-toast';
 
 const OrderTracking = () => {
   const { orderId } = useParams();
@@ -22,6 +30,18 @@ const OrderTracking = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('progress');
   const [orderData, setOrderData] = useState<any>(null);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [showLocationInput, setShowLocationInput] = useState(false);
+  const { toast } = useToast();
+  
+  // User location hook
+  const userLocation = useUserLocation();
+  
+  // Mock location updates
+  const mockLocation = useMockLocation(
+    orderId || 'DEMO123',
+    orderData?.status || 'processing'
+  );
 
   // Setup order data
   useEffect(() => {
@@ -98,7 +118,43 @@ const OrderTracking = () => {
     );
   }
 
-  const { status, timeline, driverName, driverPhone, estimatedDeliveryMinutes, distanceRemaining, orderItems, totalAmount } = orderData;
+  // Use live mock location data if available
+  const status = mockLocation.status;
+  const { timeline, driverName, driverPhone, orderItems, totalAmount } = orderData;
+  const estimatedDeliveryMinutes = mockLocation.estimatedMinutes;
+  const distanceRemaining = mockLocation.distanceRemaining;
+  
+  const handleShareTracking = () => {
+    const trackingUrl = `${window.location.origin}/order/tracking/${orderId}`;
+    navigator.clipboard.writeText(trackingUrl).then(() => {
+      toast({
+        title: "Link Copied!",
+        description: "Tracking link copied to clipboard"
+      });
+    }).catch(() => {
+      toast({
+        title: "Failed to Copy",
+        description: "Please copy the link manually",
+        variant: "destructive"
+      });
+    });
+  };
+
+  const handleManualLocation = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const lat = parseFloat(formData.get('lat') as string);
+    const lng = parseFloat(formData.get('lng') as string);
+    
+    if (!isNaN(lat) && !isNaN(lng)) {
+      userLocation.setManualLocation(lat, lng);
+      setShowLocationInput(false);
+      toast({
+        title: "Location Set",
+        description: "Your location has been updated"
+      });
+    }
+  };
   
   const currentStep = status === 'pending' ? 0 : 
                      status === 'processing' ? 1 :
@@ -119,12 +175,12 @@ const OrderTracking = () => {
       color: "restaurant"
     },
     {
-      position: orderData.driverLocation,
+      position: mockLocation.driverLocation,
       title: `Driver - ${driverName}`,
       color: "driver"
     },
     {
-      position: orderData.customerLocation,
+      position: userLocation.location || orderData.customerLocation,
       title: "Your Location",
       color: "customer"
     }
@@ -133,17 +189,33 @@ const OrderTracking = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="p-4 max-w-3xl mx-auto mt-8">
+      <div className="p-4 max-w-3xl mx-auto mt-8 mb-20">
         <ErrorBoundary>
           <Card className="mx-auto mb-6">
             <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2">
-                <Clock className="h-5 w-5" />
-                Order #{orderId}
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {orderItems?.length} items • Rs. {totalAmount}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5" />
+                    Order #{orderId}
+                  </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {orderItems?.length} items • Rs. {totalAmount}
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleShareTracking}
+                  className="gap-2"
+                >
+                  <Share2 className="h-4 w-4" />
+                  Share
+                </Button>
+              </div>
+              
+              {/* Animated Progress Bar */}
+              <ProgressBar status={status} className="mt-4" />
             </CardHeader>
             
             <CardContent>
@@ -206,7 +278,15 @@ const OrderTracking = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <p className="text-sm text-muted-foreground">Estimated Delivery</p>
-                          <p className="text-xl font-semibold">{estimatedDeliveryMinutes} minutes</p>
+                          <CountdownTimer 
+                            initialMinutes={estimatedDeliveryMinutes}
+                            onComplete={() => {
+                              toast({
+                                title: "Order Delivered! 🎉",
+                                description: "Your order should arrive any moment now"
+                              });
+                            }}
+                          />
                         </div>
                         <div>
                           <p className="text-sm text-muted-foreground">Distance Remaining</p>
@@ -226,15 +306,80 @@ const OrderTracking = () => {
                       </div>
                     </div>
                   )}
+                  
+                  {status === 'delivered' && (
+                    <div className="mt-6 pt-6 border-t border-border">
+                      <div className="flex items-center gap-3 p-4 bg-primary/10 rounded-lg">
+                        <CheckCircle2 className="h-8 w-8 text-primary" />
+                        <div>
+                          <p className="font-semibold text-primary">Order Delivered!</p>
+                          <p className="text-sm text-muted-foreground">Thank you for ordering with us</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="map" className="mt-0">
                   <div className="space-y-4">
+                    {/* Location Permission UI */}
+                    {!userLocation.location && !userLocation.permissionDenied && (
+                      <Alert>
+                        <MapPin className="h-4 w-4" />
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>Enable location for better tracking</span>
+                          <Button 
+                            size="sm" 
+                            onClick={userLocation.requestLocation}
+                            disabled={userLocation.loading}
+                          >
+                            {userLocation.loading ? 'Getting...' : 'Allow Location'}
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {userLocation.permissionDenied && !showLocationInput && (
+                      <Alert variant="destructive">
+                        <MapPinOff className="h-4 w-4" />
+                        <AlertDescription className="flex items-center justify-between">
+                          <span>Location access denied</span>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => setShowLocationInput(true)}
+                          >
+                            Enter Manually
+                          </Button>
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    {showLocationInput && (
+                      <form onSubmit={handleManualLocation} className="flex gap-2">
+                        <Input 
+                          name="lat" 
+                          placeholder="Latitude (e.g., 27.7172)" 
+                          type="number" 
+                          step="any"
+                          required 
+                        />
+                        <Input 
+                          name="lng" 
+                          placeholder="Longitude (e.g., 85.3240)" 
+                          type="number" 
+                          step="any"
+                          required 
+                        />
+                        <Button type="submit">Set</Button>
+                      </form>
+                    )}
+                    
                     <div className="aspect-[4/3] w-full rounded-lg overflow-hidden border">
                       <GoogleMap 
                         markers={mapMarkers}
                         path={orderData.route}
-                        center={orderData.driverLocation}
+                        center={mockLocation.driverLocation}
                         className="w-full h-full"
                         showControls={true}
                         showLandmarks={true}
@@ -302,9 +447,34 @@ const OrderTracking = () => {
           </Card>
         </ErrorBoundary>
       </div>
+      
+      {/* Floating Help Button */}
+      <motion.div
+        className="fixed bottom-6 right-6 z-50"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <Button
+          size="lg"
+          className="rounded-full h-14 w-14 shadow-lg"
+          onClick={() => setSupportOpen(true)}
+        >
+          <HelpCircle className="h-6 w-6" />
+        </Button>
+      </motion.div>
+      
+      {/* Support Chat Modal */}
+      <SupportChatModal 
+        open={supportOpen}
+        onOpenChange={setSupportOpen}
+        orderId={orderId}
+      />
+      
       <Footer />
     </div>
   );
 };
 
 export default OrderTracking;
+
