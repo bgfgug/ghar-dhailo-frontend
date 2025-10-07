@@ -99,6 +99,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.removeItem('user');
     setUser(null);
     setIsAuthenticated(false);
+    // Redirect to login page after logout
+    window.location.href = '/auth/login';
   };
 
   return (

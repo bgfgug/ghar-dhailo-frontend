@@ -75,12 +75,15 @@ const App = () => (
                   <Routes>
                     {/* 
                       USER FLOW:
-                      1. First visit: / (Splash) → /onboarding → /auth/login → /home
-                      2. Returning user (not logged in): / (Splash) → /auth/login → /home
+                      1. First-time user: / (Splash) → /onboarding → /auth/login → /home
+                      2. Returning user (logged out): / (Splash) → /auth/login → /home
                       3. Returning user (logged in): / (Splash) → /home
+                      4. After logout: Redirect to /auth/login
                       
-                      Protected routes redirect to /auth/login if not authenticated
-                      Public routes (/about, /faq) are accessible to all
+                      ROUTE TYPES:
+                      - Public routes (/about, /faq): Accessible to everyone, no auth required
+                      - Auth routes (/auth/*): Login, Signup, etc.
+                      - Protected routes (/home, /cart, etc.): Require authentication, redirect to login if not authenticated
                     */}
                     
                     {/* Root route - Splash screen */}
