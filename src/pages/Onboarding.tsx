@@ -35,7 +35,7 @@ const Onboarding = () => {
 
   const completeOnboarding = () => {
     localStorage.setItem('onboarding_complete', 'true');
-    navigate('/auth/login');
+    navigate('/auth/login', { replace: true });
   };
 
   const nextSlide = () => {

@@ -8,7 +8,6 @@ import { CartProvider } from "@/context/CartContext"
 import { LocationProvider } from "@/context/LocationContext"
 import { AuthProvider } from "@/context/AuthContext"
 import ProtectedRoute from "@/components/auth/ProtectedRoute"
-import SplashManager from "@/components/SplashManager"
 import ErrorBoundary from "@/components/ErrorBoundary"
 import LazyRoute from "@/components/lazy-route"
 import SkipLink from "@/components/ui/skip-link"
@@ -44,6 +43,7 @@ import {
 } from "@/routes/lazy-routes"
 
 // Import non-lazy components
+import Splash from "./pages/Splash"
 import Onboarding from "./pages/Onboarding"
 import AdminLogin from "./pages/auth/AdminLogin"
 import DriverLogin from "./pages/auth/DriverLogin"
@@ -71,20 +71,45 @@ const App = () => (
           <CartProvider>
             <BrowserRouter>
               <ErrorBoundary>
-                <SplashManager>
-                  <main id="main-content">
-                    <Routes>
-                      {/* Root redirect */}
-                      <Route path="/" element={<Navigate to="/home" replace />} />
+                <main id="main-content">
+                  <Routes>
+                    {/* 
+                      USER FLOW:
+                      1. First visit: / (Splash) → /onboarding → /auth/login → /home
+                      2. Returning user (not logged in): / (Splash) → /auth/login → /home
+                      3. Returning user (logged in): / (Splash) → /home
                       
-                      {/* Public routes */}
-                      <Route path="/onboarding" element={<Onboarding />} />
-                      <Route path="/auth/login" element={<LazyRoute><LazyLogin /></LazyRoute>} />
-                      <Route path="/auth/signup" element={<LazyRoute><LazySignup /></LazyRoute>} />
-                      <Route path="/auth/forgot-password" element={<LazyRoute><LazyForgotPassword /></LazyRoute>} />
-                      <Route path="/auth/reset-password" element={<LazyRoute><LazyResetPassword /></LazyRoute>} />
-                      <Route path="/about" element={<LazyRoute><LazyAbout /></LazyRoute>} />
-                      <Route path="/faq" element={<LazyRoute><LazyFAQ /></LazyRoute>} />
+                      Protected routes redirect to /auth/login if not authenticated
+                      Public routes (/about, /faq) are accessible to all
+                    */}
+                    
+                    {/* Root route - Splash screen */}
+                    <Route path="/" element={<Splash />} />
+                    
+                    {/* Public routes - no authentication required */}
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/auth/login" element={<LazyRoute><LazyLogin /></LazyRoute>} />
+                    <Route path="/auth/signup" element={<LazyRoute><LazySignup /></LazyRoute>} />
+                    <Route path="/auth/forgot-password" element={<LazyRoute><LazyForgotPassword /></LazyRoute>} />
+                    <Route path="/auth/reset-password" element={<LazyRoute><LazyResetPassword /></LazyRoute>} />
+                    
+                    {/* Public informational routes */}
+                    <Route 
+                      path="/about" 
+                      element={
+                        <ProtectedRoute requireAuth={false}>
+                          <LazyRoute><LazyAbout /></LazyRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
+                    <Route 
+                      path="/faq" 
+                      element={
+                        <ProtectedRoute requireAuth={false}>
+                          <LazyRoute><LazyFAQ /></LazyRoute>
+                        </ProtectedRoute>
+                      } 
+                    />
                       
                       {/* Admin routes */}
                       <Route path="/admin/login" element={<AdminLogin />} />
@@ -222,11 +247,10 @@ const App = () => (
                         } 
                       />
                       
-                      {/* Catch all */}
-                      <Route path="*" element={<NotFound />} />
-                    </Routes>
-                  </main>
-                </SplashManager>
+                    {/* Catch all */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </main>
               </ErrorBoundary>
             </BrowserRouter>
           </CartProvider>

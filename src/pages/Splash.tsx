@@ -6,20 +6,30 @@ import { useAuth } from "@/context/AuthContext"
 
 const Splash = () => {
   const navigate = useNavigate()
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   useEffect(() => {
-    // Auto-navigate after 3 seconds based on authentication status
+    // Don't navigate while auth is still loading
+    if (isLoading) return;
+
+    // Check localStorage flags
+    const hasSeenOnboarding = localStorage.getItem('onboarding_complete') === 'true';
+    
     const timer = setTimeout(() => {
       if (isAuthenticated) {
-        navigate('/home')
+        // User is logged in - go to home
+        navigate('/home', { replace: true })
+      } else if (hasSeenOnboarding) {
+        // User has seen onboarding but not logged in - go to login
+        navigate('/auth/login', { replace: true })
       } else {
-        navigate('/onboarding')
+        // First time user - go to onboarding
+        navigate('/onboarding', { replace: true })
       }
-    }, 3000)
+    }, 2000) // Reduced to 2 seconds for better UX
 
     return () => clearTimeout(timer)
-  }, [navigate, isAuthenticated])
+  }, [navigate, isAuthenticated, isLoading])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-saffron-500 to-crimson-500 dark:from-saffron-700 dark:to-crimson-700 flex items-center justify-center">
